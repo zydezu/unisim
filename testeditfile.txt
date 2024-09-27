@@ -7,3 +7,5 @@ large git commits
 like this one :)
 
 - 27/09/2024 - 青猫
+
+does discord work
