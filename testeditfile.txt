@@ -12,7 +12,7 @@ does discord work
 
 test it again
 
-30/9/2024 Testing commits bcus ive never used github before
+30/9/2024 Testing NOT commits but pull requests bcus ive never used github before
 bruh moment
 
 vscode -> make edit -> add commit message -> push changes
