@@ -16,3 +16,5 @@ test it again
 bruh moment
 
 vscode -> make edit -> add commit message -> push changes
+
+test from Z drive (VPN)
