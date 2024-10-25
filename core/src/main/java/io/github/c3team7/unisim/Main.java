@@ -85,7 +85,10 @@ public class Main extends Game {
         }
 
         spriteBatch.begin();
+        font.getData().setScale(1);
         font.draw(spriteBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
+        font.getData().setScale(5);
+        font.draw(spriteBatch, "UNISIM", 200, 500);
         spriteBatch.end();
     }
 
