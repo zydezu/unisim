@@ -32,10 +32,10 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build project
-      run: ./gradlew :desktop:dist
+      run: ./gradlew lwjgl3:jar
 
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v3
       with:
         name: LibGDX-desktop-JAR
-        path: desktop/build/libs/*.jar
+        path: lwjgl3/build/libs/*.jar
