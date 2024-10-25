@@ -15,11 +15,13 @@ public class Map {
 
     public int getIndexFromTileCoords(int x, int y) {
         if (y < 0 || y > HEIGHT){
-            throw new 
+            //TODO
+            //Add exception
         }
 
         if (x < 0 || x > WIDTH){
-            throw new
+            //TODO
+            //Add exception
         }
         return y * WIDTH + x;
     }
