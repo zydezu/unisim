@@ -1,10 +1,11 @@
 package io.github.c3team7.unisim;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -16,16 +17,20 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-/**
- * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all
- * platforms.
- */
-public class Main extends ApplicationAdapter {
+public class Main extends Game {
     private ShapeRenderer shapeRenderer;
+
+    private SpriteBatch spriteBatch;
+    private BitmapFont font;
 
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
+
+        shapeRenderer = new ShapeRenderer();
+        spriteBatch = new SpriteBatch();
+
+        font = new BitmapFont(Gdx.files.internal("default.fnt"));
     }
 
     @Override
@@ -60,6 +65,10 @@ public class Main extends ApplicationAdapter {
                 shapeRenderer.end();
             }
         }
+
+        spriteBatch.begin();
+        font.draw(spriteBatch, "FPS:" + + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
+        spriteBatch.end();
     }
 
     @Override
