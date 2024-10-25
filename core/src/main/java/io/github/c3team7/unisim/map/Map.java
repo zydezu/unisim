@@ -5,7 +5,7 @@ public class Map {
     private final int WIDTH = 64;
     private final int HEIGHT = 36;
 
-    private final int TILE_SIZE = 24;
+    private final int TILE_SIZE = 20;
 
     private int[] map; // Each integer is a uid for a tile (e.g. 1=grass, 2=water, etc)
 
