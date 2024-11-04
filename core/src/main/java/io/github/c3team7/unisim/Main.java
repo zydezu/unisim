@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics.DisplayMode;
+import com.badlogic.gdx.Graphics.Monitor;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -69,9 +72,10 @@ public class Main extends Game {
         shapeRenderer = new ShapeRenderer();
         spriteBatch = new SpriteBatch();
 
-        font = new BitmapFont(Gdx.files.internal("default.fnt"));    
+        font = new BitmapFont(Gdx.files.internal("default.fnt"));
 
-        screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Gdx.graphics.getDisplayMode().refreshRate);
+        screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
+                Gdx.graphics.getDisplayMode().refreshRate);
         System.out.println(screeninfo); // DEBUG
 
         // CREATE MAP THEN CREATE ENTITIES FOR MAP
@@ -82,6 +86,22 @@ public class Main extends Game {
 
     @Override
     public void render() {
+        // inputs
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            Boolean fullScreen = Gdx.graphics.isFullscreen();
+            Monitor currMonitor = Gdx.graphics.getMonitor();
+            if (fullScreen) {
+                Gdx.graphics.setWindowedMode(1280, 720);
+            } else {
+                DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
+                if (!Gdx.graphics.setFullscreenMode(displayMode)) {
+                    // failed
+                }
+            }
+
+        }
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -98,17 +118,19 @@ public class Main extends Game {
         }
 
         framesElapsed++;
-        timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime(); 
+        timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
         timeRemaining = timeAllowed - timeElapsed;
-        // delta time is the amount of time since the last frame AKA games use this value to keep movement at the same speed no matter the framerate
+        // delta time is the amount of time since the last frame AKA games use this
+        // value to keep movement at the same speed no matter the framerate
 
-        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end as we want to draw it ontop of the sprites )
+        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end as we want to
+        // draw it ontop of the sprites )
         spriteBatch.begin();
 
         // draw sprites first
-		for (Sprite sprite : new ArrayList<>(map.getEntities())) {
-			sprite.draw(spriteBatch, Gdx.graphics.getDeltaTime());
-		}
+        for (Sprite sprite : new ArrayList<>(map.getEntities())) {
+            sprite.draw(spriteBatch, Gdx.graphics.getDeltaTime());
+        }
 
         font.getData().setScale(1);
         font.draw(spriteBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
