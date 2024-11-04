@@ -1,5 +1,7 @@
 package io.github.c3team7.unisim;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -36,6 +38,7 @@ public class Main extends Game {
     float timeRemaining = 0;
     private final float timeAllowed = 300;
 
+    protected Map map;
 
     class ScreenInfo {
         public ScreenInfo(int width, int height, int refresh) {
@@ -69,7 +72,12 @@ public class Main extends Game {
         font = new BitmapFont(Gdx.files.internal("default.fnt"));    
 
         screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Gdx.graphics.getDisplayMode().refreshRate);
-        System.out.println(screeninfo);
+        System.out.println(screeninfo); // DEBUG
+
+        // CREATE MAP THEN CREATE ENTITIES FOR MAP
+
+        map = new Map(); // store all sprites entities
+        new Building(map, 50, 100, 0, 150, 150);
     }
 
     @Override
@@ -94,7 +102,14 @@ public class Main extends Game {
         timeRemaining = timeAllowed - timeElapsed;
         // delta time is the amount of time since the last frame AKA games use this value to keep movement at the same speed no matter the framerate
 
+        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end as we want to draw it ontop of the sprites )
         spriteBatch.begin();
+
+        // draw sprites first
+		for (Sprite sprite : new ArrayList<>(map.getEntities())) {
+			sprite.draw(spriteBatch, Gdx.graphics.getDeltaTime());
+		}
+
         font.getData().setScale(1);
         font.draw(spriteBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
 
@@ -104,6 +119,7 @@ public class Main extends Game {
 
         font.getData().setScale(2);
         font.draw(spriteBatch, "UNISIM", 200, 500);
+
         spriteBatch.end();
     }
 
