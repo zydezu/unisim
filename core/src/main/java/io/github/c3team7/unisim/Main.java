@@ -33,6 +33,8 @@ public class Main extends Game {
     ScreenInfo screeninfo;
     int framesElapsed = 0;
     float timeElapsed = 0;
+    float timeRemaining = 0;
+    private final float timeAllowed = 300;
 
 
     class ScreenInfo {
@@ -88,7 +90,9 @@ public class Main extends Game {
         }
 
         framesElapsed++;
-        timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
+        timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime(); 
+        timeRemaining = timeAllowed - timeElapsed;
+        // delta time is the amount of time since the last frame AKA games use this value to keep movement at the same speed no matter the framerate
 
         spriteBatch.begin();
         font.getData().setScale(1);
@@ -96,6 +100,7 @@ public class Main extends Game {
 
         font.draw(spriteBatch, "FRAMES ELAPSED: " + framesElapsed, 0, 150);
         font.draw(spriteBatch, "TIME ELAPSED: " + timeElapsed, 0, 180);
+        font.draw(spriteBatch, "TIME REMAINING: " + timeRemaining, 0, 210);
 
         font.getData().setScale(2);
         font.draw(spriteBatch, "UNISIM", 200, 500);
