@@ -31,6 +31,9 @@ public class Main extends Game {
     private BitmapFont font;
 
     ScreenInfo screeninfo;
+    int framesElapsed = 0;
+    float timeElapsed = 0;
+
 
     class ScreenInfo {
         public ScreenInfo(int width, int height, int refresh) {
@@ -84,9 +87,16 @@ public class Main extends Game {
             }
         }
 
+        framesElapsed++;
+        timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
+
         spriteBatch.begin();
         font.getData().setScale(1);
         font.draw(spriteBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
+
+        font.draw(spriteBatch, "FRAMES ELAPSED: " + framesElapsed, 0, 150);
+        font.draw(spriteBatch, "TIME ELAPSED: " + timeElapsed, 0, 180);
+
         font.getData().setScale(2);
         font.draw(spriteBatch, "UNISIM", 200, 500);
         spriteBatch.end();
