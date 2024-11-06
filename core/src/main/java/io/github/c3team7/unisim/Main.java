@@ -31,6 +31,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 //
 // Research AssetManager() - https://libgdx.com/wiki/managing-your-assets
 // HAI ! ^_^
+// bye
 
 public class Main extends Game {
     private OrthographicCamera camera;
