@@ -44,7 +44,7 @@ public class Main extends Game {
     private SpriteBatch batch;
     private BitmapFont font;
 
-    ScreenInfo screeninfo;
+    ScreenInfo screeninfo; // debug
 
     //game state
     enum State {
@@ -60,6 +60,7 @@ public class Main extends Game {
     int framesElapsed = 0;
     float timeElapsed = 0;
     float timeRemaining = 0;
+    String timeRemainingReadable = "";
     private final float timeAllowed = 300;
 
     //mouse position
@@ -86,6 +87,7 @@ public class Main extends Game {
 
     @Override
     public void create() {
+        // setting up camera
         float aspectRatio = (float) Gdx.graphics.getHeight() / (float) Gdx.graphics.getWidth();
         float viewableWorldWidth = 32.0f;
         camera = new OrthographicCamera(viewableWorldWidth, viewableWorldWidth * aspectRatio);
@@ -140,6 +142,9 @@ public class Main extends Game {
             }
         }
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            gameState = State.PAUSED;
+        }
 
         // mouse pos
         mouseX = Gdx.input.getX();
@@ -168,6 +173,7 @@ public class Main extends Game {
         framesElapsed++;
         timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
         timeRemaining = timeAllowed - timeElapsed;
+        timeRemainingReadable = convertTimeToReadable(timeRemaining);
         // delta time is the amount of time since the last frame AKA games use this
         // value to keep movement at the same speed no matter the framerate
 
@@ -186,6 +192,13 @@ public class Main extends Game {
         }
 
         batch.end();
+    }
+
+    private String convertTimeToReadable(float seconds) {
+        int minutes = (int)seconds / 60;
+        int tmpSeconds = (int)seconds % 60;
+
+        return String.format("%d:%02d", minutes, tmpSeconds);
     }
     
     // should probably rewrite this entire section
@@ -214,9 +227,9 @@ public class Main extends Game {
         font.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
 
         font.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 150);
-        font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
+        // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
-        font.draw(batch, "TIME REMAINING: " + timeRemaining, 0, 210);
+        font.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, 210);
 
         font.draw(batch, "GAME STATE: " + gameState, 0, 300);
 
@@ -225,7 +238,7 @@ public class Main extends Game {
     }
 
     private void renderTitle() {
-        font.draw(batch, "TIME REMAINING: " + timeRemaining, 0, 210);
+        font.draw(batch, "START GAME", 0, 0);
     }
 
     @Override
