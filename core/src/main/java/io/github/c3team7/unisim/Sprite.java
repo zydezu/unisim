@@ -12,6 +12,7 @@ public abstract class Sprite {
     protected Map map;
     protected float angle = 0.0f;
 
+    // this instantiator adds the sprite to the Map class's LinkedHashSet (list of entities that need to be rendered)
     public Sprite(Map map) {
         this.map = map;
         map.getEntities().add(this);
@@ -37,6 +38,11 @@ public abstract class Sprite {
     protected void setWidthHeight(float width, float height) {
         rectangle.width = width;
         rectangle.height = height;
+    }
+
+    protected void setRectangeWidthHeightAuto() {
+        texture = getTexture(); // we need to get the texture (since this calculation is done before drawing starts) here otherwise CRASH!
+        rectangle.setSize(texture.getWidth(), texture.getHeight());
     }
 
     public abstract Texture createTexture();

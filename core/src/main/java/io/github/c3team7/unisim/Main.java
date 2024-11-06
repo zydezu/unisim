@@ -26,6 +26,11 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+
+// TO DO
+//
+// Research AssetManager() - https://libgdx.com/wiki/managing-your-assets
+
 public class Main extends Game {
     private OrthographicCamera camera;
     private OrthographicCamera hudCamera;
@@ -100,6 +105,7 @@ public class Main extends Game {
 
         map = new Map(); // store all sprites entities
         new Building(map, 50, 100, 0, 150, 150);
+        new Graphic(map, 0, 0, 0, "");
     }
 
     // boched attempt at keeping 16/9 resizing window
@@ -128,8 +134,6 @@ public class Main extends Game {
                 }
             }
         }
-
-
 
         // mouse pos
         mouseX = Gdx.input.getX();
@@ -171,6 +175,9 @@ public class Main extends Game {
         }
 
         renderDebugText();
+        if (gameState == State.TITLE) {
+            renderTitle();
+        }
 
         batch.end();
     }
@@ -183,7 +190,6 @@ public class Main extends Game {
         font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
         font.draw(batch, "TIME REMAINING: " + timeRemaining, 0, 210);
 
-
         font.draw(batch, "GAME STATE: " + gameState, 0, 300);
 
         font.getData().setScale(2);
@@ -191,7 +197,7 @@ public class Main extends Game {
     }
 
     private void renderTitle() {
-
+        font.draw(batch, "TIME REMAINING: " + timeRemaining, 0, 210);
     }
 
     @Override
