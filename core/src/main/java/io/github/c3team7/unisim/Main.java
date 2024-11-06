@@ -142,8 +142,12 @@ public class Main extends Game {
             }
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            gameState = State.PAUSED;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            if (gameState == State.PAUSED) {
+                gameState = State.TITLE; // FIXME: Change this
+            } else {
+                gameState = State.PAUSED;
+            }
         }
 
         // mouse pos
@@ -171,9 +175,11 @@ public class Main extends Game {
         shapeRenderer.end();   
 
         framesElapsed++;
-        timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
-        timeRemaining = timeAllowed - timeElapsed;
-        timeRemainingReadable = convertTimeToReadable(timeRemaining);
+        if (gameState == State.GAMEPLAY) {
+            timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
+            timeRemaining = timeAllowed - timeElapsed;
+            timeRemainingReadable = convertTimeToReadable(timeRemaining);    
+        }
         // delta time is the amount of time since the last frame AKA games use this
         // value to keep movement at the same speed no matter the framerate
 
@@ -189,6 +195,9 @@ public class Main extends Game {
         renderDebugText();
         if (gameState == State.TITLE) {
             renderTitle();
+        }
+        if (gameState == State.PAUSED) {
+            renderPauseScreen();
         }
 
         batch.end();
@@ -238,7 +247,12 @@ public class Main extends Game {
     }
 
     private void renderTitle() {
-        font.draw(batch, "START GAME", 0, 0);
+        font.draw(batch, "START GAME", 500, 200);
+    }
+
+    private void renderPauseScreen() {
+        font.getData().setScale(3);
+        font.draw(batch, "PAUSED", 640, 360);
     }
 
     @Override
