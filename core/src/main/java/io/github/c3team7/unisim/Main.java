@@ -128,6 +128,9 @@ public class Main extends Game {
                 }
             }
         }
+
+
+
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = Gdx.input.getY();
@@ -167,6 +170,12 @@ public class Main extends Game {
             sprite.draw(batch, Gdx.graphics.getDeltaTime());
         }
 
+        renderDebugText();
+
+        batch.end();
+    }
+
+    private void renderDebugText() {
         font.getData().setScale(1);
         font.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
 
@@ -174,10 +183,15 @@ public class Main extends Game {
         font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
         font.draw(batch, "TIME REMAINING: " + timeRemaining, 0, 210);
 
+
+        font.draw(batch, "GAME STATE: " + gameState, 0, 300);
+
         font.getData().setScale(2);
         font.draw(batch, "UNISIM", 200, 500);
+    }
 
-        batch.end();
+    private void renderTitle() {
+
     }
 
     @Override
