@@ -107,11 +107,8 @@ public class Main extends Game {
         new Building(map, 50, 100, 0, 150, 150, 0);
 
 
-        new Graphic(map, 0, 0, 0, 1, "");
-        Sprite tempSprite = map.getSpriteByID(1);
-        float X = (Gdx.graphics.getWidth() - tempSprite.getWidth()) / 2.0f;
-        float Y = (Gdx.graphics.getHeight() - tempSprite.getHeight()) / 2.0f;
-        tempSprite.setPos(X, Y);
+        new Graphic(map, 0, 150, 0, 1, "");
+        setSpriteCenter(map.getSpriteByID(1));
     }
 
     // boched attempt at keeping 16/9 resizing window
@@ -141,6 +138,7 @@ public class Main extends Game {
             }
         }
 
+
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = Gdx.input.getY();
@@ -154,16 +152,16 @@ public class Main extends Game {
         batch.setProjectionMatrix(camera.combined);
 
         int tileSize = 20;
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int y = 0; y < screeninfo.height; y = y + tileSize) {
             for (int x = 0; x < screeninfo.width; x = x + tileSize) {
                 if (x % (2 * tileSize) != y % (2 * tileSize)) {
-                    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
                     shapeRenderer.setColor(Color.BLUE);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
-                    shapeRenderer.end();   
                 }
             }
         }
+        shapeRenderer.end();   
 
         framesElapsed++;
         timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
@@ -188,8 +186,25 @@ public class Main extends Game {
         batch.end();
     }
     
-    private void getCenterofScreen() {
+    // should probably rewrite this entire section
+    private void setSpriteCenterX(Sprite tempSprite) {
+        tempSprite.rectangle.x = getSpriteCenterX(tempSprite);
+    }
 
+    private void setSpriteCenterY(Sprite tempSprite) {
+        tempSprite.rectangle.y = getSpriteCenterY(tempSprite);
+    }
+
+    private void setSpriteCenter(Sprite tempSprite) {
+        tempSprite.setPos(getSpriteCenterX(tempSprite), getSpriteCenterY(tempSprite));
+    }
+
+    private float getSpriteCenterX(Sprite tempSprite) {
+        return (Gdx.graphics.getWidth() - tempSprite.getWidth()) / 2.0f;
+    }
+
+    private float getSpriteCenterY(Sprite tempSprite) {
+        return (Gdx.graphics.getHeight() - tempSprite.getHeight()) / 2.0f;
     }
 
     private void renderDebugText() {
@@ -198,6 +213,7 @@ public class Main extends Game {
 
         font.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 150);
         font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
+
         font.draw(batch, "TIME REMAINING: " + timeRemaining, 0, 210);
 
         font.draw(batch, "GAME STATE: " + gameState, 0, 300);

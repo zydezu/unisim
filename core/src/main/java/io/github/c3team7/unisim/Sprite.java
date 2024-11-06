@@ -49,8 +49,7 @@ public abstract class Sprite {
     }
 
     protected void setWidthHeight(float width, float height) {
-        rectangle.width = width;
-        rectangle.height = height;
+        rectangle.setSize(width, height);
     }
 
     protected void setRectangeWidthHeightAuto() {
