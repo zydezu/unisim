@@ -38,10 +38,26 @@ public class Main extends Game {
     private BitmapFont font;
 
     ScreenInfo screeninfo;
+
+    //game state
+    enum State {
+        TITLE,
+        GAMEPLAY,
+        PAUSED,
+        GAMEOVER
+    }
+
+    State gameState = State.TITLE; 
+
+    //timer
     int framesElapsed = 0;
     float timeElapsed = 0;
     float timeRemaining = 0;
     private final float timeAllowed = 300;
+
+    //mouse position
+    int mouseX = 0;
+    int mouseY = 0;
 
     protected Map map;
 
@@ -112,9 +128,14 @@ public class Main extends Game {
                 }
             }
         }
+        // mouse pos
+        mouseX = Gdx.input.getX();
+        mouseY = Gdx.input.getY();
 
+        ///debug
+        System.err.println("Mouse pos:" + mouseX + " " + mouseY);
 
-        System.err.println(Math.sin(timeElapsed));
+        //BG colour and set background
         ScreenUtils.clear((float)Math.sin(timeElapsed), (float)Math.sin(timeElapsed + 15), (float)Math.sin(timeElapsed + 30), 1);
 		camera.update();
         batch.setProjectionMatrix(camera.combined);
