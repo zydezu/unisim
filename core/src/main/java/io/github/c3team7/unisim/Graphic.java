@@ -11,7 +11,7 @@ public class Graphic extends Sprite {
     public static String ASSET = "assets\\graphics\\defaultgraphic.png";
 
     // automatically set the width and height of the sprite its to original resolution
-    public Graphic(Map map, float x, float y, float angle, String asset) {
+    public Graphic(Map map, float x, float y, float angle, int ID, String asset) {
         super(map);
         rectangle = new Rectangle();
         setRectangeWidthHeightAuto();
@@ -22,8 +22,8 @@ public class Graphic extends Sprite {
     }
 
     // manually set the width and height of the sprite (useful for scaling down large images)
-    public Graphic(Map map, float x, float y, float angle, float width, float height, String asset) {
-        this(map, x, y, angle, asset);
+    public Graphic(Map map, float x, float y, float angle, float width, float height, int ID, String asset) {
+        this(map, x, y, angle, ID, asset);
         setWidthHeight(width, height);
     }
 

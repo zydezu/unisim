@@ -8,15 +8,15 @@ public class Building extends Sprite {
     
     public static final String ASSET = "centralhall.jpg";
 
-    public Building(Map map, float x, float y, float angle) {
+    public Building(Map map, float x, float y, float angle, int ID) {
         super(map);
         rectangle = new Rectangle();
         setRectangeWidthHeightAuto();
         setPos(x, y, angle);
     }
 
-    public Building(Map map, float x, float y, float angle, float width, float height) {
-        this(map, x, y, angle);
+    public Building(Map map, float x, float y, float angle, float width, float height, int ID) {
+        this(map, x, y, angle, ID);
         setWidthHeight(width, height);
     }
 

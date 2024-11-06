@@ -11,11 +11,16 @@ public abstract class Sprite {
     protected Rectangle rectangle;
     protected Map map;
     protected float angle = 0.0f;
+    protected int ID;
 
     // this instantiator adds the sprite to the Map class's LinkedHashSet (list of entities that need to be rendered)
     public Sprite(Map map) {
         this.map = map;
         map.getEntities().add(this);
+    }
+
+    public int getID() {
+        return ID;
     }
 
     public final Texture getTexture() {
@@ -33,6 +38,14 @@ public abstract class Sprite {
         rectangle.x = x;
         rectangle.y = y;
         this.angle = angle;
+    }
+
+    public float getWidth() {
+        return rectangle.width;
+    }
+
+    public float getHeight() {
+        return rectangle.height;
     }
 
     protected void setWidthHeight(float width, float height) {

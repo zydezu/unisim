@@ -104,8 +104,14 @@ public class Main extends Game {
         // CREATE MAP THEN CREATE ENTITIES FOR MAP
 
         map = new Map(); // store all sprites entities
-        new Building(map, 50, 100, 0, 150, 150);
-        new Graphic(map, 0, 0, 0, "");
+        new Building(map, 50, 100, 0, 150, 150, map.sprites.size());
+
+
+        new Graphic(map, 0, 0, 0, map.sprites.size(), "");
+        Sprite tempSprite = map.getSpriteById(2);
+        float X = (Gdx.graphics.getWidth() - tempSprite.getWidth()) / 2.0f;
+        float Y = (Gdx.graphics.getHeight() - tempSprite.getHeight()) / 2.0f;
+
     }
 
     // boched attempt at keeping 16/9 resizing window
@@ -180,6 +186,10 @@ public class Main extends Game {
         }
 
         batch.end();
+    }
+    
+    private void getCenterofScreen() {
+
     }
 
     private void renderDebugText() {
