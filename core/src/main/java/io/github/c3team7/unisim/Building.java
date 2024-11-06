@@ -11,6 +11,7 @@ public class Building extends Sprite {
     public Building(Map map, float x, float y, float angle, int ID) {
         super(map);
         rectangle = new Rectangle();
+        this.ID = ID;
         setRectangeWidthHeightAuto();
         setPos(x, y, angle);
     }

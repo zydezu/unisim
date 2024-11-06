@@ -12,9 +12,9 @@ public class Map {
     }
 
     // return a sprite by ID
-    public Sprite getSpriteById(int id) {
+    public Sprite getSpriteByID(int ID) {
         for (Sprite sprite : sprites) {
-            if (sprite.getID() == id) {
+            if (sprite.getID() == ID) {
                 return sprite;
             }
         }

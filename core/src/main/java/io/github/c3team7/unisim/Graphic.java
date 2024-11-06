@@ -14,6 +14,7 @@ public class Graphic extends Sprite {
     public Graphic(Map map, float x, float y, float angle, int ID, String asset) {
         super(map);
         rectangle = new Rectangle();
+        this.ID = ID;
         setRectangeWidthHeightAuto();
         setPos(x, y, angle);
         if (asset != "") {
