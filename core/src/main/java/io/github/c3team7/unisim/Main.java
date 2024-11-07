@@ -107,12 +107,14 @@ public class Main extends Game {
 
         // CREATE MAP THEN CREATE ENTITIES FOR MAP
 
-        map = new Map(); // store all sprites entities
-        new Building(map, 50, 100, 0, 150, 150, 0);
+        map = new Map(); // store all sprites entities        
+        createTitleAssets();
 
+        // new Building(map, 50, 100, 0, 150, 150, 0);
+    }
 
-        new Graphic(map, 0, 150, 0, 1, "");
-        setSpriteCenter(map.getSpriteByID(1));
+    private void createTitleAssets() {
+        setSpriteCenterX(new Graphic(map, 0, 400, 0, 1, "")); // create + center same line
     }
 
     // boched attempt at keeping 16/9 resizing window
@@ -144,7 +146,7 @@ public class Main extends Game {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             if (gameState == State.PAUSED) {
-                gameState = State.TITLE; // FIXME: Change this
+                gameState = State.GAMEPLAY; // FIXME: Change this
             } else {
                 gameState = State.PAUSED;
             }
@@ -158,16 +160,16 @@ public class Main extends Game {
         System.err.println("Mouse pos:" + mouseX + " " + mouseY);
 
         //BG colour and set background
-        ScreenUtils.clear((float)Math.sin(timeElapsed), (float)Math.sin(timeElapsed + 15), (float)Math.sin(timeElapsed + 30), 1);
+        ScreenUtils.clear(0, 0, 0, 0);
 		camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        int tileSize = 20;
+        int tileSize = 40;
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int y = 0; y < screeninfo.height; y = y + tileSize) {
             for (int x = 0; x < screeninfo.width; x = x + tileSize) {
                 if (x % (2 * tileSize) != y % (2 * tileSize)) {
-                    shapeRenderer.setColor(Color.BLUE);
+                    shapeRenderer.setColor(Color.RED);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 }
             }
@@ -180,6 +182,7 @@ public class Main extends Game {
             timeRemaining = timeAllowed - timeElapsed;
             timeRemainingReadable = convertTimeToReadable(timeRemaining);    
         }
+
         // delta time is the amount of time since the last frame AKA games use this
         // value to keep movement at the same speed no matter the framerate
 
