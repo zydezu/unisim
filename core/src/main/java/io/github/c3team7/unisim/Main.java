@@ -38,6 +38,7 @@ public class Main extends Game {
         font = new BitmapFont(Gdx.files.internal("default.fnt"));
 
         map = new Map("map.txt");
+        map.placeBuilding(map.getIndexFromTileCoords(1, 3), 3, 2);
     }
 
     private void input(){
@@ -92,6 +93,7 @@ public class Main extends Game {
             case 0 -> Color.PURPLE;
             case 1 -> Color.GREEN;
             case 2 -> Color.BLUE;
+            case 3 -> Color.RED;
             default -> Color.BROWN;
         };
     }

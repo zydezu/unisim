@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Map {
-    public final int TILE_SIZE = 20;
+     public final int TILE_SIZE = 20;
      public final int WIDTH = 1280 / TILE_SIZE;
      public final int HEIGHT = 720 / TILE_SIZE;
      private int[] map; // Each integer is a uid for a tile (e.g. 1=grass, 2=water, etc)
@@ -37,7 +37,6 @@ public class Map {
         catch(Exception e){
             System.out.println(e);
         }
-        System.out.println(Arrays.toString(map));
      }
 
      public int get(int index){
@@ -62,8 +61,25 @@ public class Map {
          return y * WIDTH + x;
      }
 
+
      public int[] getTileCoordsFromIndex(int index){
          return new int[]{index % WIDTH, index / WIDTH};
+     }
+
+    /**
+     *
+     * @param index The index of the building's bottom left corner in the {@link #map}
+     * @param width The width of the building in tiles
+     * @param height The height of the building in tiles
+     * @return true if the building was successfully placed
+     */
+     public boolean placeBuilding(int index, int width, int height){
+         for (int rowStart = index, row = 0; row < height; row++, rowStart += WIDTH) {
+             for (int column = 0; column < width; column++) {
+                 map[rowStart + column] = 3;
+             }
+         }
+         return true;
      }
 
      private void exportMap() {
@@ -84,5 +100,5 @@ public class Map {
              System.out.println("Error: " + e.getMessage());
          }
      }
-     }
+ }
 
