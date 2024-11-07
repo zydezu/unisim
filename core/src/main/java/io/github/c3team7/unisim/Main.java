@@ -201,6 +201,7 @@ public class Main extends Game {
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                     // START GAME
                     gameState = State.GAMEPLAY;
+
                 }
                 break;
             case GAMEPLAY:

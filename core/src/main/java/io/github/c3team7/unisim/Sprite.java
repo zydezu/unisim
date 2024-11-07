@@ -60,6 +60,16 @@ public abstract class Sprite {
     public abstract Texture createTexture();
 
     public void draw(SpriteBatch batch, float timeDelta) {
-        batch.draw(getTexture(), rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        batch.draw(getTexture(), rectangle.x, rectangle.y,
+                getWidth()/2, getWidth()/2,
+                getWidth(), getHeight(),
+                1.0f, 1.0f, angle,
+                0, 0,
+                (int) getWidth(), (int) getHeight(),
+                false, false);
+        }
+
+    public void dispose() {
+        getTexture().dispose();
     }
 }
