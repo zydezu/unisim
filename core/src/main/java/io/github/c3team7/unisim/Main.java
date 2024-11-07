@@ -201,17 +201,20 @@ public class Main extends Game {
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                     // START GAME
                     gameState = State.GAMEPLAY;
-                    map.getSpriteByID(1).destroy(); // remove title sprites
+
+                    destroySpritesByIDs(new int[] {1}); // remove title sprites
+                }
+                break;
+            case PAUSED: 
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                    gameState = State.GAMEPLAY;
                 }
                 break;
             case GAMEPLAY:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     gameState = State.PAUSED;
                 }
-            case PAUSED:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                    gameState = State.GAMEPLAY;
-                }
+                break;
             default:
                 break;
         }
@@ -250,6 +253,12 @@ public class Main extends Game {
 
     private float getSpriteCenterY(Sprite tempSprite) {
         return (Gdx.graphics.getHeight() - tempSprite.getHeight()) / 2.0f;
+    }
+
+    public void destroySpritesByIDs(int[] spriteIDs) {
+        for (int id : spriteIDs) {
+            map.getSpriteByID(id).destroy();
+        }
     }
 
     private void renderDebugText() {
