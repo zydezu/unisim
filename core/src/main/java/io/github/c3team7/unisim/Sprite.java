@@ -9,14 +9,14 @@ public abstract class Sprite {
 
     protected Texture texture;
     protected Rectangle rectangle;
-    protected Map map;
+    protected Render render;
     protected float angle = 0.0f;
     protected int ID;
 
     // this instantiator adds the sprite to the Map class's LinkedHashSet (list of entities that need to be rendered)
-    public Sprite(Map map) {
-        this.map = map;
-        map.getEntities().add(this);
+    public Sprite(Render render) {
+        this.render = render;
+        render.getEntities().add(this);
     }
 
     public int getID() {
@@ -70,7 +70,7 @@ public abstract class Sprite {
     }
     
     public void destroy() {
-        map.getEntities().remove(this);
+        render.getEntities().remove(this);
     }
 
     public void dispose() {

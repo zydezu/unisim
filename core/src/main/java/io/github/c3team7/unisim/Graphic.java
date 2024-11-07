@@ -9,8 +9,8 @@ public class Graphic extends Sprite {
     public static String ASSET = "graphics\\defaultgraphic.png";
 
     // automatically set the width and height of the sprite its to original resolution
-    public Graphic(Map map, float x, float y, float angle, int ID, String asset) {
-        super(map);
+    public Graphic(Render render, float x, float y, float angle, int ID, String asset) {
+        super(render);
         rectangle = new Rectangle();
         this.ID = ID;
         if (asset != "") {
@@ -21,8 +21,8 @@ public class Graphic extends Sprite {
     }
 
     // manually set the width and height of the sprite (useful for scaling down large images)
-    public Graphic(Map map, float x, float y, float angle, float width, float height, int ID, String asset) {
-        this(map, x, y, angle, ID, asset);
+    public Graphic(Render render, float x, float y, float angle, float width, float height, int ID, String asset) {
+        this(render, x, y, angle, ID, asset);
         setWidthHeight(width, height);
     }
 
