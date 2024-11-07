@@ -5,7 +5,19 @@ import java.util.Set;
 
 public class Map {
 
+    protected int width;
+    protected int height;
+    protected int tilesize;
+    protected int[] map;
+
+    // stores all sprites that will be rendered (this includes gameplay tiles and title screen graphics)
     protected Set<Sprite> sprites = new LinkedHashSet<>();
+
+    public Map(int width, int height, int tilesize) {
+        this.width = width;
+        this.height = height;
+        this.tilesize = tilesize;
+    }
 
     public Set<Sprite> getEntities() {
         return sprites;
@@ -19,6 +31,11 @@ public class Map {
             }
         }
         return null;  // return null if no sprite with the given ID is found
+    }
+
+    public int getIndex(int x, int y) {
+        // do ur array stuff here
+        return 0;
     }
 
 

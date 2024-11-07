@@ -107,7 +107,8 @@ public class Main extends Game {
 
         // CREATE MAP THEN CREATE ENTITIES FOR MAP
 
-        map = new Map(); // store all sprites entities        
+        // FIXME: these values need changing, i put in previous values  
+        map = new Map(64, 36, 20); // store all sprites entities        
         createTitleAssets();
 
         // new Building(map, 50, 100, 0, 150, 150, 0);
@@ -130,34 +131,7 @@ public class Main extends Game {
     public void render() {
         // inputs
 
-        // Fullscreen Toggle
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
-            Boolean fullScreen = Gdx.graphics.isFullscreen();
-            Monitor currMonitor = Gdx.graphics.getMonitor();
-            if (fullScreen) {
-                Gdx.graphics.setWindowedMode(1280, 720);
-            } else {
-                DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
-                if (!Gdx.graphics.setFullscreenMode(displayMode)) {
-                    // failed
-                }
-            }
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            if (gameState == State.PAUSED) {
-                gameState = State.GAMEPLAY; // FIXME: Change this
-            } else {
-                gameState = State.PAUSED;
-            }
-        }
-
-        // mouse pos
-        mouseX = Gdx.input.getX();
-        mouseY = Gdx.input.getY();
-
-        ///debug
-        System.err.println("Mouse pos:" + mouseX + " " + mouseY);
+        manageInputs();
 
         //BG colour and set background
         ScreenUtils.clear(0, 0, 0, 0);
@@ -206,6 +180,49 @@ public class Main extends Game {
         batch.end();
     }
 
+    private void manageInputs() {
+        // Fullscreen Toggle
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            Boolean fullScreen = Gdx.graphics.isFullscreen();
+            Monitor currMonitor = Gdx.graphics.getMonitor();
+            if (fullScreen) {
+                Gdx.graphics.setWindowedMode(1280, 720);
+            } else {
+                DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
+                if (!Gdx.graphics.setFullscreenMode(displayMode)) {
+                    // failed
+                }
+            }
+        }
+
+        // Manage player inputs here
+        switch (gameState) {
+            case TITLE:
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+                    // START GAME
+                    gameState = State.GAMEPLAY;
+                }
+                break;
+            case GAMEPLAY:
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                    if (gameState == State.PAUSED) {
+                        gameState = State.GAMEPLAY;
+                    } else {
+                        gameState = State.PAUSED;
+                    }
+                }
+            default:
+                break;
+        }
+
+        // mouse pos
+        mouseX = Gdx.input.getX();
+        mouseY = Gdx.input.getY();
+
+        // TODO: debug
+        System.err.println("Mouse pos:" + mouseX + " " + mouseY);
+    }
+
     private String convertTimeToReadable(float seconds) {
         int minutes = (int)seconds / 60;
         int tmpSeconds = (int)seconds % 60;
@@ -236,21 +253,18 @@ public class Main extends Game {
 
     private void renderDebugText() {
         font.getData().setScale(1);
-        font.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, font.getLineHeight());
-
-        font.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 150);
+        font.draw(batch, "GAME STATE: " + gameState, 0, 700);
+        font.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
+        font.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
-        font.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, 210);
-
-        font.draw(batch, "GAME STATE: " + gameState, 0, 300);
-
-        font.getData().setScale(2);
-        font.draw(batch, "UNISIM", 200, 500);
+        font.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, font.getLineHeight());
     }
 
     private void renderTitle() {
+        font.getData().setScale(2);
         font.draw(batch, "START GAME", 500, 200);
+        font.draw(batch, "Press ENTER to start", 500, 150);
     }
 
     private void renderPauseScreen() {
