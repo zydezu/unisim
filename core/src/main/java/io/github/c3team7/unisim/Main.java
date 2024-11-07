@@ -36,6 +36,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 public class Main extends Game {
     private OrthographicCamera camera;
     private OrthographicCamera hudCamera;
+    private Viewport viewport;
+
     private ShapeRenderer shapeRenderer;
 
     private Vector2 playerPosition = new Vector2();
@@ -94,8 +96,8 @@ public class Main extends Game {
         camera = new OrthographicCamera(viewableWorldWidth, viewableWorldWidth * aspectRatio);
         camera.position.set(playerPosition.x, playerPosition.y, 1.0f);
 
-        hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        hudCamera.position.set(hudCamera.viewportWidth / 2.0f, hudCamera.viewportHeight / 2.0f, 1.0f);
+        // hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        // hudCamera.position.set(hudCamera.viewportWidth / 2.0f, hudCamera.viewportHeight / 2.0f, 1.0f);
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
@@ -120,6 +122,7 @@ public class Main extends Game {
         createTitleAssets();
 
         // new Building(map, 50, 100, 0, 150, 150, 0);
+        viewport = new FitViewport(1280, 720, camera);
     }
 
     private void createTitleAssets() {
@@ -129,20 +132,34 @@ public class Main extends Game {
     // boched attempt at keeping 16/9 resizing window
     @Override
 	public void resize(int width, int height) {
-        int tempheight = Gdx.graphics.getHeight();
-        Gdx.graphics.setWindowedMode((int)(tempheight * 1.778), height);
+        // int tempheight = Gdx.graphics.getHeight();
+        // Gdx.graphics.setWindowedMode((int)(tempheight * 1.778), height);
 
-		camera.setToOrtho(false, width, height);
+        viewport.update(width, height, true); // The 'true' flag ensures the camera updates
+
+		// camera.setToOrtho(false, width, height);
 	}
 
     private void draw() {
-        //BG colour and set background
+        // BG colour and set background
         ScreenUtils.clear(0, 0, 0, 0);
 		camera.update();
         batch.setProjectionMatrix(camera.combined);
 
         if (gameState == State.GAMEPLAY) {
             drawMap();
+        } else {
+            int tileSize = 40;
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            for (int y = 0; y < screeninfo.height; y = y + tileSize) {
+                for (int x = 0; x < screeninfo.width; x = x + tileSize) {
+                    if (x % (2 * tileSize) != y % (2 * tileSize)) {
+                        shapeRenderer.setColor(Color.RED);
+                        shapeRenderer.rect(x, y, tileSize, tileSize);
+                    }
+                }
+            }
+            shapeRenderer.end();
         }
 
         // DRAWING ORDER -> bottom layer -> top layer ( text is at the end as we want to
