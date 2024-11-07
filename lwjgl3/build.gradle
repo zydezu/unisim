@@ -30,6 +30,7 @@ if (JavaVersion.current().isJava9Compatible()) {
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  implementation 'com.badlogicgames.gdx:gdx-freetype:1.9.13'
   implementation project(':core')
 
   if(enableGraalNative == 'true') {
