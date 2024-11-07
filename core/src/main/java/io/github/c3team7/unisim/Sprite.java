@@ -67,7 +67,11 @@ public abstract class Sprite {
                 0, 0,
                 (int) getWidth(), (int) getHeight(),
                 false, false);
-        }
+    }
+    
+    public void destroy() {
+        map.getEntities().remove(this);
+    }
 
     public void dispose() {
         getTexture().dispose();

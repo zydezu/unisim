@@ -201,16 +201,16 @@ public class Main extends Game {
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                     // START GAME
                     gameState = State.GAMEPLAY;
-
+                    map.getSpriteByID(1).destroy(); // remove title sprites
                 }
                 break;
             case GAMEPLAY:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                    if (gameState == State.PAUSED) {
-                        gameState = State.GAMEPLAY;
-                    } else {
-                        gameState = State.PAUSED;
-                    }
+                    gameState = State.PAUSED;
+                }
+            case PAUSED:
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                    gameState = State.GAMEPLAY;
                 }
             default:
                 break;
