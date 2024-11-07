@@ -40,9 +40,6 @@ public class Main extends Game {
 
     private ShapeRenderer shapeRenderer;
 
-    // private Vector2 playerPosition = new Vector2();
-    // private boolean cameraFollowsPlayer = true;
-
     private SpriteBatch batch;
     private BitmapFont font;
 
@@ -94,10 +91,6 @@ public class Main extends Game {
         float aspectRatio = (float) Gdx.graphics.getHeight() / (float) Gdx.graphics.getWidth();
         float viewableWorldWidth = 32.0f;
         camera = new OrthographicCamera(viewableWorldWidth, viewableWorldWidth * aspectRatio);
-        // camera.position.set(playerPosition.x, playerPosition.y, 1.0f);
-
-        // hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        // hudCamera.position.set(hudCamera.viewportWidth / 2.0f, hudCamera.viewportHeight / 2.0f, 1.0f);
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
