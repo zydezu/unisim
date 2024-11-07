@@ -252,9 +252,14 @@ public class Main extends Game {
     }
 
     private void renderTitle() {
+        font.getData().setScale(1);
+        font.draw(batch, "Start Game", 500, 250);
+        font.draw(batch, "Instructions", 500, 230);
+        font.draw(batch, "Options (idk if we will have this)", 500, 210);
+        font.draw(batch, "End Game", 500, 190);
+
         font.getData().setScale(2);
-        font.draw(batch, "START GAME", 500, 200);
-        font.draw(batch, "Press ENTER to start", 500, 150);
+        font.draw(batch, "Press ENTER to start", 500, 100);
     }
 
     private void renderPauseScreen() {
