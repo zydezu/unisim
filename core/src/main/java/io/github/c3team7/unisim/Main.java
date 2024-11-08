@@ -25,7 +25,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-
+import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
 // TO DO
 //
@@ -42,6 +44,8 @@ public class Main extends Game {
 
     private SpriteBatch batch;
     private BitmapFont font;
+
+    private final String FONT_PATH = "fonts\\segoeui.ttf"; // Place your TTF font in assets/fonts/
 
     ScreenInfo screeninfo; // debug
 
@@ -95,6 +99,8 @@ public class Main extends Game {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
+        createFont();
+
         font = new BitmapFont(Gdx.files.internal("default.fnt"));
 
         screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
@@ -116,6 +122,28 @@ public class Main extends Game {
 
         // new Building(map, 50, 100, 0, 150, 150, 0);
         viewport = new FitViewport(1280, 720, camera);
+    }
+
+    private void createFont() {
+        // Generate font from TTF file
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(FONT_PATH));
+        FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+        
+        // Set font size
+        parameter.size = 48;
+
+        // Set color if needed
+        parameter.color = Color.WHITE;
+
+        // Optionally set border or shadow
+        parameter.borderWidth = 2;
+        parameter.borderColor = Color.BLACK;
+
+        // Generate the font
+        font = generator.generateFont(parameter);  // BitmapFont from TTF
+
+        // Dispose generator to free up resources
+        generator.dispose();
     }
 
     private void createTitleAssets() {
