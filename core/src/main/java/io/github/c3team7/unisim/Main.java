@@ -202,10 +202,10 @@ public class Main extends Game {
                 for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
                     // pattern
                     if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
-                        shapeRenderer.setColor(0.2f, 0.5f, 0.8f, 1f);
+                        shapeRenderer.setColor(Color.BLACK);
                         shapeRenderer.rect(x, y, tileSize, tileSize);
                     } else {
-                        shapeRenderer.setColor(Color.WHITE);
+                        shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
                         shapeRenderer.rect(x, y, tileSize, tileSize);
                     }
 
