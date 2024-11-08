@@ -43,9 +43,12 @@ public class Main extends Game {
     private ShapeRenderer shapeRenderer;
 
     private SpriteBatch batch;
-    private BitmapFont font;
 
-    private final String FONT_PATH = "fonts\\segoeui.ttf"; // Place your TTF font in assets/fonts/
+    // fonts
+    FreeTypeFontGenerator generator;
+    FreeTypeFontParameter parameter;
+    private BitmapFont currentFont;
+    private final String FONT_PATH = "fonts/segoeui.ttf"; // Place your TTF font in assets/fonts/
 
     ScreenInfo screeninfo; // debug
 
@@ -99,9 +102,9 @@ public class Main extends Game {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
-        createFont();
-
-        font = new BitmapFont(Gdx.files.internal("default.fnt"));
+        setUpFontGenerator();
+        createFont(20, Color.WHITE, 0, Color.BLACK); // first font stored
+        // font = new BitmapFont(Gdx.files.internal("default.fnt"));
 
         screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
                 Gdx.graphics.getDisplayMode().refreshRate);
@@ -124,23 +127,25 @@ public class Main extends Game {
         viewport = new FitViewport(1280, 720, camera);
     }
 
-    private void createFont() {
+    private void setUpFontGenerator() {
         // Generate font from TTF file
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(FONT_PATH));
-        FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-        
+        generator = new FreeTypeFontGenerator(Gdx.files.internal(FONT_PATH));
+        parameter = new FreeTypeFontParameter();
+    }
+
+    private void createFont(int fontsize, Color color, int borderwidth, Color bordercolor) {
         // Set font size
-        parameter.size = 48;
+        parameter.size = fontsize;
 
         // Set color if needed
-        parameter.color = Color.WHITE;
+        parameter.color = color;
 
         // Optionally set border or shadow
-        parameter.borderWidth = 2;
-        parameter.borderColor = Color.BLACK;
+        parameter.borderWidth = borderwidth;
+        parameter.borderColor = bordercolor;
 
         // Generate the font
-        font = generator.generateFont(parameter);  // BitmapFont from TTF
+        currentFont = generator.generateFont(parameter);  // BitmapFont from TTF
 
         // Dispose generator to free up resources
         generator.dispose();
@@ -270,27 +275,25 @@ public class Main extends Game {
     }
 
     private void renderDebugText() {
-        font.getData().setScale(1);
-        font.draw(batch, "GAME STATE: " + gameState, 0, 700);
-        font.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
-        font.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
+        currentFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
+        currentFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
+        currentFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
-        font.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, font.getLineHeight());
+        currentFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, currentFont.getLineHeight());
     }
 
     private void renderTitle() {
-        font.getData().setScale(1);
-        font.draw(batch, "Start Game", 500, 250);
-        font.draw(batch, "Instructions", 500, 230);
-        font.draw(batch, "Options (idk if keep)", 500, 210);
-        font.draw(batch, "Quit Game", 500, 190);
-        font.draw(batch, "Press ENTER to start", 500, 100);
+        currentFont.draw(batch, "Start Game", 500, 250);
+        currentFont.draw(batch, "Instructions", 500, 230);
+        currentFont.draw(batch, "Options (idk if keep)", 500, 210);
+        currentFont.draw(batch, "Quit Game", 500, 190);
+        currentFont.draw(batch, "Press ENTER to start", 500, 100);
     }
 
     private void renderPauseScreen() {
-        font.getData().setScale(3);
-        font.draw(batch, "PAUSED", 640, 360);
+        currentFont.getData().setScale(3);
+        currentFont.draw(batch, "PAUSED", 640, 360);
     }
 
     @Override
