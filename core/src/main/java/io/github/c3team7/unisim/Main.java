@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -95,9 +96,9 @@ public class Main extends Game {
     @Override
     public void create() {
         // setting up camera
-        float aspectRatio = (float) Gdx.graphics.getHeight() / (float) Gdx.graphics.getWidth();
-        float viewableWorldWidth = 32.0f;
-        camera = new OrthographicCamera(viewableWorldWidth, viewableWorldWidth * aspectRatio);
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 1280, 720);
+        viewport = new FitViewport(1280, 720, camera);
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
@@ -124,7 +125,6 @@ public class Main extends Game {
         createTitleAssets();
 
         // new Building(map, 50, 100, 0, 150, 150, 0);
-        viewport = new FitViewport(1280, 720, camera);
     }
 
     private void setUpFontGenerator() {
@@ -143,6 +143,10 @@ public class Main extends Game {
         // Optionally set border or shadow
         parameter.borderWidth = borderwidth;
         parameter.borderColor = bordercolor;
+
+        parameter.genMipMaps = true;
+        parameter.minFilter = TextureFilter.Linear;
+        parameter.magFilter = TextureFilter.Linear;
 
         // Generate the font
         currentFont = generator.generateFont(parameter);  // BitmapFont from TTF
