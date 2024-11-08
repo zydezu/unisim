@@ -103,7 +103,7 @@ public class Main extends Game {
         batch = new SpriteBatch();
 
         setUpFontGenerator();
-        createFont(20, Color.WHITE, 0, Color.BLACK); // first font stored
+        createFont(20, Color.WHITE, 1, Color.BLACK); // first font stored
         // font = new BitmapFont(Gdx.files.internal("default.fnt"));
 
         screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
@@ -292,7 +292,6 @@ public class Main extends Game {
     }
 
     private void renderPauseScreen() {
-        currentFont.getData().setScale(3);
         currentFont.draw(batch, "PAUSED", 640, 360);
     }
 

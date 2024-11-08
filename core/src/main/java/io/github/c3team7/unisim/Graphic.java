@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class Graphic extends Sprite {
     
-    public static String ASSET = "graphics\\defaultgraphic.png";
+    public static String ASSET = "graphics/defaultgraphic.png";
 
     // automatically set the width and height of the sprite its to original resolution
     public Graphic(Render render, float x, float y, float angle, int ID, String asset) {
