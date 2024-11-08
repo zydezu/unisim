@@ -156,7 +156,7 @@ public class Main extends Game {
     }
 
     private void createTitleAssets() {
-        setSpriteCenterX(new Graphic(render, 0, 400, 0, 1, "")); // create + center same line
+        setSpriteCenter(new Graphic(render, 0, 400, 0f, 2f, 1, "graphics/unisim.png")); // create + center same line
     }
 
     // boched attempt at keeping 16/9 resizing window

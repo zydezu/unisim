@@ -26,6 +26,11 @@ public class Graphic extends Sprite {
         setWidthHeight(width, height);
     }
 
+    public Graphic(Render render, float x, float y, float angle, float scale, int ID, String asset) {
+        this(render, x, y, angle, ID, asset);
+        setScale(scale, scale);
+    }
+
     @Override
     public Texture createTexture() {
         return new Texture(Gdx.files.internal(ASSET));

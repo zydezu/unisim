@@ -11,6 +11,8 @@ public abstract class Sprite {
     protected Rectangle rectangle;
     protected Render render;
     protected float angle = 0.0f;
+    protected float scalex = 1.0f;
+    protected float scaley = 1.0f;
     protected int ID;
 
     // this instantiator adds the sprite to the Map class's LinkedHashSet (list of entities that need to be rendered)
@@ -31,7 +33,7 @@ public abstract class Sprite {
     }
 
     protected void setPos(float x, float y) {
-        setPos(x, y, 90f);
+        setPos(x, y, this.angle);
     }
 
     protected void setPos(float x, float y, float angle) {
@@ -57,13 +59,20 @@ public abstract class Sprite {
         rectangle.setSize(texture.getWidth(), texture.getHeight());
     }
 
+    protected void setScale(float scalex, float scaley) {
+        this.scalex = scalex;
+        this.scaley = scaley;
+    }
+
     public abstract Texture createTexture();
 
     public void draw(SpriteBatch batch, float timeDelta) {
+        // batch.draw(getTexture(), rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+
         batch.draw(getTexture(), rectangle.x, rectangle.y,
                 getWidth()/2, getWidth()/2,
-                getWidth(), getHeight(),
-                1.0f, 1.0f, angle,
+                rectangle.width, rectangle.height,
+                scalex, scaley, angle,
                 0, 0,
                 (int) getWidth(), (int) getHeight(),
                 false, false);
