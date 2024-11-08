@@ -15,7 +15,8 @@ public abstract class Sprite {
     protected float scaley = 1.0f;
     protected int ID;
 
-    // this instantiator adds the sprite to the Map class's LinkedHashSet (list of entities that need to be rendered)
+    // this instantiator adds the sprite to the Map class's LinkedHashSet (list of
+    // entities that need to be rendered)
     public Sprite(Render render) {
         this.render = render;
         render.getEntities().add(this);
@@ -55,7 +56,8 @@ public abstract class Sprite {
     }
 
     protected void setRectangeWidthHeightAuto() {
-        texture = getTexture(); // we need to get the texture (since this calculation is done before drawing starts) here otherwise CRASH!
+        texture = getTexture(); // we need to get the texture (since this calculation is done before drawing
+                                // starts) here otherwise CRASH!
         rectangle.setSize(texture.getWidth(), texture.getHeight());
     }
 
@@ -69,15 +71,17 @@ public abstract class Sprite {
     public void draw(SpriteBatch batch, float timeDelta) {
         // batch.draw(getTexture(), rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
-        batch.draw(getTexture(), rectangle.x, rectangle.y,
-                getWidth()/2, getWidth()/2,
-                rectangle.width, rectangle.height,
-                scalex, scaley, angle,
-                0, 0,
-                (int) getWidth(), (int) getHeight(),
-                false, false);
+        batch.draw(getTexture(),
+                rectangle.x, rectangle.y, // Position
+                rectangle.width / 2, rectangle.height / 2, // Origin at center
+                rectangle.width, rectangle.height, // Dimensions
+                scalex, scaley, // Scaling
+                angle, // Rotation
+                0, 0, // Texture region start (bottom-left corner)
+                (int) getWidth(), (int) getHeight(), // Texture region dimensions
+                false, false); // Flip on X and Y
     }
-    
+
     public void destroy() {
         render.getEntities().remove(this);
     }

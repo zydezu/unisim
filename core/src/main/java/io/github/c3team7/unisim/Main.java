@@ -53,7 +53,7 @@ public class Main extends Game {
 
     ScreenInfo screeninfo; // debug
 
-    //game state
+    // game state
     enum State {
         TITLE,
         GAMEPLAY,
@@ -61,21 +61,26 @@ public class Main extends Game {
         GAMEOVER
     }
 
-    State gameState = State.TITLE; 
+    State gameState = State.TITLE;
 
-    //timer
+    // timer
     int framesElapsed = 0;
     float timeElapsed = 0;
     float timeRemaining = 0;
     String timeRemainingReadable = "";
     private final float timeAllowed = 300;
 
-    //mouse position
+    // mouse position
     int mouseX = 0;
     int mouseY = 0;
 
     protected Map map;
     protected Render render;
+
+    // tile scrolling effect
+    int tileSize = 50;
+    float scrollSpeed = 50f; // Speed of scrolling in pixels per second
+    float offset = 0f; // Horizontal offset for scrolling
 
     class ScreenInfo {
         public ScreenInfo(int width, int height, int refresh) {
@@ -115,12 +120,12 @@ public class Main extends Game {
 
         // FIXME: these values need changing, i put in previous values
 
-        map = new Map("map.txt"); // generate the map 
+        map = new Map("map.txt"); // generate the map
         map.placeBuilding(map.getIndexFromTileCoords(3, 4), 2, 3);
         map.placeBuilding(0, 1, 1);
         map.placeBuilding(2303, 1, 1);
-        render = new Render();   
-        
+        render = new Render();
+
         // store all sprites entities
         createTitleAssets();
 
@@ -149,46 +154,61 @@ public class Main extends Game {
         parameter.magFilter = TextureFilter.Linear;
 
         // Generate the font
-        currentFont = generator.generateFont(parameter);  // BitmapFont from TTF
+        currentFont = generator.generateFont(parameter); // BitmapFont from TTF
 
         // Dispose generator to free up resources
         generator.dispose();
     }
 
     private void createTitleAssets() {
-        setSpriteCenter(new Graphic(render, 0, 400, 0f, 2f, 1, "graphics/unisim.png")); // create + center same line
+        setSpriteCenterX(new Graphic(render, 0, 400, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center same
+                                                                                             // line
     }
 
     // boched attempt at keeping 16/9 resizing window
     @Override
-	public void resize(int width, int height) {
+    public void resize(int width, int height) {
 
         viewport.update(width, height, true); // The 'true' flag ensures the camera updates
 
         // int tempheight = Gdx.graphics.getHeight();
         // Gdx.graphics.setWindowedMode((int)(tempheight * 1.778), height);
 
-
-		// camera.setToOrtho(false, width, height);
-	}
+        // camera.setToOrtho(false, width, height);
+    }
 
     private void draw() {
         // BG colour and set background
-        ScreenUtils.clear(0, 0, 0, 0);
-		camera.update();
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1.0f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        camera.update();
         batch.setProjectionMatrix(camera.combined);
 
         if (gameState == State.GAMEPLAY) {
             drawMap();
         } else {
-            int tileSize = 40;
+            // Update the offset based on time and speed
+            offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
+
+            // Keep the offset within the tile size range to avoid large numbers
+            offset %= tileSize;
+
+            // Start drawing the tiles
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            for (int y = 0; y < screeninfo.height; y = y + tileSize) {
-                for (int x = 0; x < screeninfo.width; x = x + tileSize) {
-                    if (x % (2 * tileSize) != y % (2 * tileSize)) {
-                        shapeRenderer.setColor(Color.RED);
+
+            // Adjust the starting points of x and y based on the offset
+            for (int y = -tileSize + (int) offset; y < screeninfo.height + tileSize; y += tileSize) {
+                for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
+                    // pattern
+                    if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
+                        shapeRenderer.setColor(0.2f, 0.5f, 0.8f, 1f);
+                        shapeRenderer.rect(x, y, tileSize, tileSize);
+                    } else {
+                        shapeRenderer.setColor(Color.WHITE);
                         shapeRenderer.rect(x, y, tileSize, tileSize);
                     }
+
                 }
             }
             shapeRenderer.end();
@@ -222,10 +242,10 @@ public class Main extends Game {
                 shapeRenderer.rect(x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
             }
         }
-        shapeRenderer.end(); 
+        shapeRenderer.end();
     }
 
-    private Color getColourFromUID(int uid){
+    private Color getColourFromUID(int uid) {
         return switch (uid) {
             case 0 -> Color.PURPLE;
             case 1 -> Color.GREEN;
@@ -240,17 +260,17 @@ public class Main extends Game {
         if (gameState == State.GAMEPLAY) {
             timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
             timeRemaining = timeAllowed - timeElapsed;
-            timeRemainingReadable = convertTimeToReadable(timeRemaining);    
+            timeRemainingReadable = convertTimeToReadable(timeRemaining);
         }
     }
 
     private String convertTimeToReadable(float seconds) {
-        int minutes = (int)seconds / 60;
-        int tmpSeconds = (int)seconds % 60;
+        int minutes = (int) seconds / 60;
+        int tmpSeconds = (int) seconds % 60;
 
         return String.format("%d:%02d", minutes, tmpSeconds);
     }
-    
+
     // should probably rewrite this entire section
     private void setSpriteCenterX(Sprite tempSprite) {
         tempSprite.rectangle.x = getSpriteCenterX(tempSprite);
@@ -330,10 +350,10 @@ public class Main extends Game {
                     // START GAME
                     gameState = State.GAMEPLAY;
 
-                    destroySpritesByIDs(new int[] {1}); // remove title sprites
+                    destroySpritesByIDs(new int[] { 1 }); // remove title sprites
                 }
                 break;
-            case PAUSED: 
+            case PAUSED:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     gameState = State.GAMEPLAY;
                 }
