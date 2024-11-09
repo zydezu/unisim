@@ -48,8 +48,8 @@ public class Main extends Game {
     // fonts
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
-    private BitmapFont currentFont;
-    private final String FONT_PATH = "fonts/segoeui.ttf"; // Place your TTF font in assets/fonts/
+    private BitmapFont normalFont;
+    private BitmapFont boldFont;
 
     ScreenInfo screeninfo; // debug
 
@@ -75,10 +75,15 @@ public class Main extends Game {
     int mouseY = 0;
 
     // menu options
-    String[] menuOptions = {
+    String[] menuOptions = { // should probably be moved to a .txt file
             "Start Game",
             "Instructions",
             "Options (idk if keep)",
+            "Exit to Desktop"
+    };
+    String[] pauseOptions = { // should probably be moved to a .txt file
+            "Continue",
+            "Restart",
             "Quit Game"
     };
     int menuSelection = 0;
@@ -118,17 +123,14 @@ public class Main extends Game {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
-        setUpFontGenerator();
-        createFont(20, Color.WHITE, 1, Color.BLACK); // first font stored
-        // font = new BitmapFont(Gdx.files.internal("default.fnt"));
+        normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK); // first font stored
+        boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK); // first font stored
 
         screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
                 Gdx.graphics.getDisplayMode().refreshRate);
         System.out.println(screeninfo); // DEBUG
 
         // CREATE MAP THEN CREATE ENTITIES FOR MAP
-
-        // FIXME: these values need changing, i put in previous values
 
         map = new Map("map.txt"); // generate the map
         map.placeBuilding(map.getIndexFromTileCoords(3, 4), 2, 3);
@@ -146,13 +148,19 @@ public class Main extends Game {
         centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
     }
 
-    private void setUpFontGenerator() {
+    private void createPauseAssets() {
+        centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 20, "graphics/unisimlogo.png")); // create + center
+    }
+
+    private void setUpFontGenerator(String font) {
         // Generate font from TTF file
-        generator = new FreeTypeFontGenerator(Gdx.files.internal(FONT_PATH));
+        generator = new FreeTypeFontGenerator(Gdx.files.internal(font));
         parameter = new FreeTypeFontParameter();
     }
 
-    private void createFont(int fontsize, Color color, int borderwidth, Color bordercolor) {
+    private BitmapFont createFont(String font, int fontsize, Color color, int borderwidth, Color bordercolor) {
+        setUpFontGenerator(font);
+
         // Set font size
         parameter.size = fontsize;
 
@@ -167,11 +175,11 @@ public class Main extends Game {
         parameter.minFilter = TextureFilter.Linear;
         parameter.magFilter = TextureFilter.Linear;
 
-        // Generate the font
-        currentFont = generator.generateFont(parameter); // BitmapFont from TTF
+        BitmapFont generatedFont = generator.generateFont(parameter); // BitmapFont from TTF
 
-        // Dispose generator to free up resources
-        generator.dispose();
+        generator.dispose(); // prevent memory leaks
+
+        return generatedFont;
     }
 
     // boched attempt at keeping 16/9 resizing window
@@ -205,18 +213,11 @@ public class Main extends Game {
         switch (gameState) {
             case TITLE:
                 // title screen menu selection
-                if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W))
-                    menuSelection -= 1;
-                if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S))
-                    menuSelection += 1;
-                menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
-
+                menuSelectionInputs();
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                     switch (menuSelection) {
                         case 0:
-                            // START GAME
-                            gameState = State.GAMEPLAY;
-                            destroySpritesByIDs(new int[] { 1 }); // remove title sprites
+                            startGame();
                             break;
                         case 1:
                             break;
@@ -233,12 +234,27 @@ public class Main extends Game {
                 break;
             case PAUSED:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                    gameState = State.GAMEPLAY;
+                    unpauseGame();
+                }
+                menuSelectionInputs();
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+                    switch (menuSelection) {
+                        case 0:
+                            unpauseGame();
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            exitToMainMenu();
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 break;
             case GAMEPLAY:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                    gameState = State.PAUSED;
+                    pauseGame();
                 }
                 break;
             default:
@@ -248,6 +264,40 @@ public class Main extends Game {
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = Gdx.input.getY();
+    }
+
+    private void menuSelectionInputs() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W))
+            menuSelection -= 1;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S))
+            menuSelection += 1;
+        menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
+    }
+
+    private void startGame() {
+        timeElapsed = 0; // reset on repeat playthroughs
+        gameState = State.GAMEPLAY;
+        destroySpritesByIDs(new int[] { 1 }); // remove title sprites
+    }
+
+    private void pauseGame() {
+        gameState = State.PAUSED;
+        menuSelection = 0;
+        maxMenuOptions = 3;
+        createPauseAssets();
+    }
+
+    private void unpauseGame() {
+        gameState = State.GAMEPLAY;
+        destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
+    }
+
+    private void exitToMainMenu() {
+        destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
+        gameState = State.TITLE;
+        createTitleAssets();
+        menuSelection = 0;
+        maxMenuOptions = 4;
     }
 
     private void logic() {
@@ -315,7 +365,7 @@ public class Main extends Game {
             for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
                 // pattern
                 if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
-                    shapeRenderer.setColor(Color.BLACK);
+                    shapeRenderer.setColor(gameState == State.PAUSED ? Color.PINK : Color.BLACK);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 } else {
                     shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
@@ -379,28 +429,39 @@ public class Main extends Game {
             if (i == menuSelection) {
                 menuText = "> " + menuText;
             }
-            currentFont.draw(batch, menuText, 500, (250 - i * 20));
+            boldFont.draw(batch, menuText, 500, (250 - i * 40));
         }
 
-        currentFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
+        normalFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
     }
 
     private void renderPauseScreen() {
-        currentFont.draw(batch, "PAUSED", 640, 360);
+        boldFont.draw(batch, "PAUSED", 640, 360);
+
+        String menuText = "";
+        for (int i = 0; i < pauseOptions.length; i++) {
+            menuText = pauseOptions[i];
+            if (i == menuSelection) {
+                menuText = "> " + menuText;
+            }
+            boldFont.draw(batch, menuText, 500, (250 - i * 40));
+        }
+
+        normalFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
     }
 
     private void renderDebugText() {
-        currentFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
-        currentFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
-        currentFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
+        normalFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
+        normalFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
+        normalFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
-        currentFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
-        currentFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
+        normalFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
+        normalFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
 
-        currentFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
+        normalFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
 
-        currentFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, currentFont.getLineHeight());
+        normalFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, normalFont.getLineHeight());
     }
 
     @Override
