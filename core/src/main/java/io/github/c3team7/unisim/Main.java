@@ -218,7 +218,7 @@ public class Main extends Game {
     private void inputs() {
         // mouse pos
         mouseX = Gdx.input.getX();
-        mouseY = Gdx.input.getY();
+        mouseY = screeninfo.height - Gdx.input.getY(); // match sprite and text pos
 
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
@@ -246,7 +246,7 @@ public class Main extends Game {
                 }
 
                 for (int i = 0; i < optionRects.size(); i++) {
-                    if (optionRects.get(i).contains(mouseX, screeninfo.height - mouseY + 30)) {
+                    if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
                         menuSelection = i;
                         break;
                     }
@@ -257,7 +257,7 @@ public class Main extends Game {
 
                     // FIXME: fix this
                     for (int i = 0; i < optionRects.size(); i++) {
-                        if (optionRects.get(i).contains(mouseX, screeninfo.height - mouseY + 30)) {
+                        if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
                             menuSelection = i;
                             System.err.println("SELECT" + menuSelection);
                             selectMenuOption(menuSelection);
@@ -432,7 +432,6 @@ public class Main extends Game {
                     shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 }
-
             }
         }
         shapeRenderer.end();
