@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 
 public class Map {
     public final int TILE_SIZE = 20;
@@ -89,20 +90,21 @@ public class Map {
         return true;
     }
 
-    private void exportMap() {
+    public void exportMap() {
         try {
-            FileWriter writer = new FileWriter("export.txt"); // Changed file path
+            FileHandle file = Gdx.files.local("save/export.txt"); // libgdx way to write to a file
 
+            StringBuilder mapData = new StringBuilder();
             for (int i = 0; i < map.length; i++) {
-                if (((i + 1) % (WIDTH) == 0)) {
-                    writer.write(map[i] + "\n");
+                if ((i + 1) % WIDTH == 0) {
+                    mapData.append(map[i]).append("\n");
                 } else {
-                    writer.write(map[i] + "");
+                    mapData.append(map[i]);
                 }
-
             }
-            writer.close();
-        } catch (IOException e) {
+
+            file.writeString(mapData.toString(), false); // 'false' overwrites the file if it exists
+        } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
