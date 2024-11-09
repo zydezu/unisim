@@ -1,11 +1,8 @@
 package io.github.c3team7.unisim;
 
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import com.badlogic.gdx.Gdx;
 
@@ -39,14 +36,13 @@ public class Map {
                 if (c == '\n') {
                     continue; // Skip newlines
                 }
-                map[index] = c - '0'; // Convert char to integer ('0' -> 0, '1' -> 1, etc.)
+                map[index] = c - '0'; // convert char to int
                 index++;
             }
 
         } catch (Exception e) {
             System.out.println(e);
         }
-        System.out.println(map);
     }
 
     public int get(int index) {

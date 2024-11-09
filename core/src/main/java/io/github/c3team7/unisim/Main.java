@@ -212,10 +212,23 @@ public class Main extends Game {
                 menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
 
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-                    // START GAME
-                    gameState = State.GAMEPLAY;
-
-                    destroySpritesByIDs(new int[] { 1 }); // remove title sprites
+                    switch (menuSelection) {
+                        case 0:
+                            // START GAME
+                            gameState = State.GAMEPLAY;
+                            destroySpritesByIDs(new int[] { 1 }); // remove title sprites
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            Gdx.app.exit();
+                            System.exit(-1);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 break;
             case PAUSED:
@@ -264,30 +277,7 @@ public class Main extends Game {
         if (gameState == State.GAMEPLAY) {
             drawMap();
         } else {
-            // Update the offset based on time and speed
-            offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
-
-            // Keep the offset within the tile size range to avoid large numbers
-            offset %= tileSize;
-
-            // Start drawing the tiles
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-            // Adjust the starting points of x and y based on the offset
-            for (int y = -tileSize + (int) offset; y < screeninfo.height + tileSize; y += tileSize) {
-                for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
-                    // pattern
-                    if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
-                        shapeRenderer.setColor(Color.BLACK);
-                        shapeRenderer.rect(x, y, tileSize, tileSize);
-                    } else {
-                        shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
-                        shapeRenderer.rect(x, y, tileSize, tileSize);
-                    }
-
-                }
-            }
-            shapeRenderer.end();
+            drawCheckerPattern();
         }
 
         // DRAWING ORDER -> bottom layer -> top layer ( text is at the end as we want to
@@ -308,6 +298,33 @@ public class Main extends Game {
         }
 
         batch.end();
+    }
+
+    private void drawCheckerPattern() {
+        // Update the offset based on time and speed
+        offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
+
+        // Keep the offset within the tile size range to avoid large numbers
+        offset %= tileSize;
+
+        // Start drawing the tiles
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        // Adjust the starting points of x and y based on the offset
+        for (int y = -tileSize + (int) offset; y < screeninfo.height + tileSize; y += tileSize) {
+            for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
+                // pattern
+                if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
+                    shapeRenderer.setColor(Color.BLACK);
+                    shapeRenderer.rect(x, y, tileSize, tileSize);
+                } else {
+                    shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
+                    shapeRenderer.rect(x, y, tileSize, tileSize);
+                }
+
+            }
+        }
+        shapeRenderer.end();
     }
 
     private void drawMap() {
@@ -359,14 +376,13 @@ public class Main extends Game {
         String menuText = "";
         for (int i = 0; i < menuOptions.length; i++) {
             menuText = menuOptions[i];
-            System.err.println(menuText);
             if (i == menuSelection) {
                 menuText = "> " + menuText;
             }
             currentFont.draw(batch, menuText, 500, (250 - i * 20));
         }
 
-        currentFont.draw(batch, "Press ENTER to start", 500, 100);
+        currentFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
     }
 
     private void renderPauseScreen() {
