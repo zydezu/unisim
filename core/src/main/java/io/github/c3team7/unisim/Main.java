@@ -16,8 +16,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -68,6 +70,7 @@ public class Main extends Game {
 
     // timer
     int framesElapsed = 0;
+    float globalTimeElapsed = 0;
     float timeElapsed = 0;
     float timeRemaining = 0;
     String timeRemainingReadable = "";
@@ -126,6 +129,7 @@ public class Main extends Game {
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+        batch.enableBlending();
 
         normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK);
         boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK);
@@ -153,25 +157,17 @@ public class Main extends Game {
         createTitleAssets();
 
         // get rects for each menu option to select with mouse
+        optionRects.clear();
         GlyphLayout layout = new GlyphLayout();
         for (int i = 0; i < menuOptions.length; i++) {
             layout.setText(boldFont, menuOptions[i]);
 
-            System.err.println(500 + " " + (225 - i * 40) + " " + " to > " + (500 + layout.width) + " "
+            System.err.println(500 + " " + (225 - i * 40) + " to > " + (500 + layout.width) + " "
                     + ((225 - i * 40) + layout.height));
 
-            optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height));
+            optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height * 2));
         }
-
         // new Building(map, 50, 100, 0, 150, 150, 0);
-    }
-
-    private void createTitleAssets() {
-        centerSpriteX(new Graphic(render, 0, 365, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
-    }
-
-    private void createPauseAssets() {
-        centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 20, "graphics/unisimlogo.png")); // create + center
     }
 
     private void setUpFontGenerator(String font) {
@@ -204,16 +200,12 @@ public class Main extends Game {
         return generatedFont;
     }
 
-    // boched attempt at keeping 16/9 resizing window
-    @Override
-    public void resize(int width, int height) {
+    private void createTitleAssets() {
+        centerSpriteX(new Graphic(render, 0, 365, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
+    }
 
-        viewport.update(width, height, true); // The 'true' flag ensures the camera updates
-
-        // int tempheight = Gdx.graphics.getHeight();
-        // Gdx.graphics.setWindowedMode((int)(tempheight * 1.778), height);
-
-        // camera.setToOrtho(false, width, height);
+    private void createPauseAssets() {
+        centerSpriteX(new Graphic(render, 0, 500, 0f, 1f, 20, "graphics/unisimlogopixel.png")); // create + center
     }
 
     private void inputs() {
@@ -357,11 +349,12 @@ public class Main extends Game {
 
     private void logic() {
         framesElapsed++;
+        globalTimeElapsed += Gdx.graphics.getDeltaTime();
         if (gameState == State.TITLE) {
 
         }
         if (gameState == State.GAMEPLAY) {
-            timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
+            timeElapsed += Gdx.graphics.getDeltaTime();
             timeRemaining = (float) Math.ceil(timeAllowed - timeElapsed);
             timeRemainingReadable = convertTimeToReadable(timeRemaining);
         }
@@ -382,7 +375,8 @@ public class Main extends Game {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end to stay ontop )
+        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end to stay ontop
+        // )
         switch (gameState) {
             case TITLE:
                 drawCheckerPattern();
@@ -444,12 +438,22 @@ public class Main extends Game {
             }
         }
         shapeRenderer.end();
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(0, 0, 0, 0.5f);
+        for (int i = 0; i < optionRects.size(); i++) {
+            shapeRenderer.rect(550, (200 - i * 40), 150, 38);
+        }
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     public void drawClockIcon(float x, float y, float radius, float degrees) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.WHITE);
-        shapeRenderer.circle(x, y, radius); 
+        shapeRenderer.circle(x, y, radius);
         shapeRenderer.end();
 
         // end point of the clock hand
@@ -513,11 +517,12 @@ public class Main extends Game {
             if (i == menuSelection) {
                 menuText = "> " + menuText;
             }
-            boldFont.draw(batch, menuText, 500, (225 - i * 40));
+            boldFont.draw(batch, menuText, 550, (225 - i * 40));
         }
 
-        boldFont.draw(batch, "By windows007", 500, 375);
+        drawRotatedText(boldFont, batch, "By windows007", 655, 380, 9);
 
+        // 640 is 1/2 of 1280 (center of screen)
         drawCenteredText(normalFont, batch, "Use UP and DOWN to select an option", 640, 50);
         drawCenteredText(normalFont, batch, "Press ENTER to select an option", 640, 30);
     }
@@ -566,7 +571,7 @@ public class Main extends Game {
         float adjustedX = x - layout.width / 2;
         // float adjustedY = y + layout.height / 2;
         font.draw(batch, layout, adjustedX, y);
-    }    
+    }
 
     public void drawRightAlignedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
         GlyphLayout layout = new GlyphLayout(font, text);
@@ -574,11 +579,38 @@ public class Main extends Game {
         font.draw(batch, layout, adjustedX, y);
     }
 
+    public void drawRotatedText(BitmapFont font, SpriteBatch batch, String text, float x, float y, float angleDegrees) {
+        batch.end();
+
+        // set affine transformation to rotate text
+        Affine2 transform = new Affine2();
+        transform.translate(x, y); // Move to the rotation origin
+        transform.rotate(angleDegrees); // Apply rotation
+        transform.translate(-x, -y); // Move back to original position
+
+        // transform.shear(0, (float)Math.sin(globalTimeElapsed) * 0.008f);
+        // apply transformation matrix to batch
+        batch.setTransformMatrix(batch.getTransformMatrix().setAsAffine(transform));
+
+        batch.begin();
+        font.draw(batch, text, x, y); // draw text with rotation
+
+        // Reset the transformation matrix to avoid affecting other drawings
+        batch.end();
+        batch.setTransformMatrix(batch.getTransformMatrix().idt());
+        batch.begin();
+    }
+
     @Override
     public void render() {
         inputs();
         logic();
         draw();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true); // The 'true' flag ensures the camera updates
     }
 
     @Override
