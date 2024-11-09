@@ -10,9 +10,8 @@ public class Graphic extends Sprite {
 
     // automatically set the width and height of the sprite its to original resolution
     public Graphic(Render render, float x, float y, float angle, int ID, String asset) {
-        super(render);
+        super(render, ID);
         rectangle = new Rectangle();
-        this.ID = ID;
         if (asset != "") {
             ASSET = asset;
         }

@@ -128,7 +128,7 @@ public class Main extends Game {
 
         // store all sprites entities
         createTitleAssets();
-
+        
         // new Building(map, 50, 100, 0, 150, 150, 0);
     }
 
@@ -161,8 +161,7 @@ public class Main extends Game {
     }
 
     private void createTitleAssets() {
-        setSpriteCenterX(new Graphic(render, 0, 400, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center same
-                                                                                             // line
+        setSpriteCenterX(new Graphic(render, 0, 400, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
     }
 
     // boched attempt at keeping 16/9 resizing window
@@ -304,6 +303,10 @@ public class Main extends Game {
         currentFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
+        currentFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
+
+        currentFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
+
         currentFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, currentFont.getLineHeight());
     }
 
@@ -370,9 +373,6 @@ public class Main extends Game {
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = Gdx.input.getY();
-
-        // TODO: debug
-        System.err.println("Mouse pos:" + mouseX + " " + mouseY);
     }
 
     @Override

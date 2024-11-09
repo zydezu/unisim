@@ -17,9 +17,11 @@ public abstract class Sprite {
 
     // this instantiator adds the sprite to the Map class's LinkedHashSet (list of
     // entities that need to be rendered)
-    public Sprite(Render render) {
+    public Sprite(Render render, int ID) {
         this.render = render;
+        this.ID = ID;
         render.getEntities().add(this);
+        render.addID(ID);
     }
 
     public int getID() {
@@ -83,7 +85,7 @@ public abstract class Sprite {
     }
 
     public void destroy() {
-        render.getEntities().remove(this);
+        render.removeSprite(this);
     }
 
     public void dispose() {

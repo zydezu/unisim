@@ -1,16 +1,20 @@
 package io.github.c3team7.unisim;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Render {
     // stores all sprites that will be rendered (this includes gameplay tiles and title screen graphics)
     protected Set<Sprite> sprites = new LinkedHashSet<>();
-
-    
+    protected Set<Integer> setOfIDs = new HashSet<>();
 
     public Set<Sprite> getEntities() {
         return sprites;
+    }
+
+    public Boolean addID(int ID) {
+        return setOfIDs.add(ID);
     }
 
     // return a sprite by ID
@@ -20,6 +24,14 @@ public class Render {
                 return sprite;
             }
         }
-        return null;  // return null if no sprite with the given ID is found
+        return null; // return null if no sprite with the given ID is found
+    }
+
+    public Boolean removeSprite(Sprite sprite) {
+        if (setOfIDs.remove(sprite.ID)) { // check if sprite exists
+            getEntities().remove(sprite);
+            return true;
+        }
+        return false;
     }
 }

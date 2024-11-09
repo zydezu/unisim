@@ -9,9 +9,8 @@ public class Building extends Sprite {
     public static final String ASSET = "centralhall.jpg";
 
     public Building(Render render, float x, float y, float angle, int ID) {
-        super(render);
+        super(render, ID);
         rectangle = new Rectangle();
-        this.ID = ID;
         setRectangeWidthHeightAuto();
         setPos(x, y, angle);
     }
