@@ -13,8 +13,13 @@ public class Render {
         return sprites;
     }
 
-    public Boolean addID(int ID) {
-        return setOfIDs.add(ID);
+    public Boolean addSprite(Sprite sprite) {
+        if (setOfIDs.add(sprite.ID)) {
+            getEntities().add(sprite);
+            return true;
+        }
+        System.err.println("WARNING! Tried to add a sprite but the ID already exists! ID: " + sprite.ID);
+        return false;
     }
 
     // return a sprite by ID

@@ -20,8 +20,7 @@ public abstract class Sprite {
     public Sprite(Render render, int ID) {
         this.render = render;
         this.ID = ID;
-        render.getEntities().add(this);
-        render.addID(ID);
+        render.addSprite(this);
     }
 
     public int getID() {

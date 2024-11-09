@@ -155,6 +155,7 @@ public class Main extends Game {
 
     private void createTitleAssets() {
         centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
+        new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png"); // create + center
     }
 
     private void createPauseAssets() {
@@ -206,6 +207,8 @@ public class Main extends Game {
     private void inputs() {
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            map.placeBuilding(map.getIndexFromTileCoords(3, 4), 20, 30);
+
             Boolean fullScreen = Gdx.graphics.isFullscreen();
             Monitor currMonitor = Gdx.graphics.getMonitor();
             if (fullScreen) {
