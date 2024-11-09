@@ -13,9 +13,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -86,6 +89,7 @@ public class Main extends Game {
             "Restart",
             "Quit Game"
     };
+    ArrayList<Rectangle> optionRects = new ArrayList<>();    
     int menuSelection = 0;
     int maxMenuOptions = 4;
 
@@ -148,11 +152,21 @@ public class Main extends Game {
         // store all sprites entities
         createTitleAssets();
 
+        // get rects for each menu option to select with mouse
+        GlyphLayout layout = new GlyphLayout();
+        for (int i = 0; i < menuOptions.length; i++) {
+            layout.setText(boldFont, menuOptions[i]);
+
+            System.err.println(500 + " " + (225 - i * 40) + " " + " to > " + (500 + layout.width) +  " " + ((225 - i * 40) + layout.height));
+
+            optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height));
+        }
+
         // new Building(map, 50, 100, 0, 150, 150, 0);
     }
 
     private void createTitleAssets() {
-        centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
+        centerSpriteX(new Graphic(render, 0, 365, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
     }
 
     private void createPauseAssets() {
@@ -202,6 +216,10 @@ public class Main extends Game {
     }
 
     private void inputs() {
+        // mouse pos
+        mouseX = Gdx.input.getX();
+        mouseY = Gdx.input.getY();
+
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             map.placeBuilding(map.getIndexFromTileCoords(3, 4), 20, 30);
@@ -224,20 +242,27 @@ public class Main extends Game {
                 // title screen menu selection
                 menuSelectionInputs();
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-                    switch (menuSelection) {
-                        case 0:
-                            startGame();
+                    selectMenuOption(menuSelection);
+                }
+
+                for (int i = 0; i < optionRects.size(); i++) {
+                    if (optionRects.get(i).contains(mouseX, screeninfo.height - mouseY + 30)) {
+                        menuSelection = i;
+                        break;
+                    }
+                }
+
+                if (Gdx.input.justTouched()) {
+                    System.err.println(mouseX + ", " + mouseY);
+
+                    // FIXME: fix this
+                    for (int i = 0; i < optionRects.size(); i++) {
+                        if (optionRects.get(i).contains(mouseX, screeninfo.height - mouseY + 30)) {
+                            menuSelection = i;
+                            System.err.println("SELECT" + menuSelection);
+                            selectMenuOption(menuSelection);
                             break;
-                        case 1:
-                            break;
-                        case 2:
-                            break;
-                        case 3:
-                            Gdx.app.exit();
-                            System.exit(-1);
-                            break;
-                        default:
-                            break;
+                        }
                     }
                 }
                 break;
@@ -271,10 +296,6 @@ public class Main extends Game {
             default:
                 break;
         }
-
-        // mouse pos
-        mouseX = Gdx.input.getX();
-        mouseY = Gdx.input.getY();
     }
 
     private void menuSelectionInputs() {
@@ -283,6 +304,24 @@ public class Main extends Game {
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S))
             menuSelection += 1;
         menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
+    }
+
+    private void selectMenuOption(int menuSelection) {
+        switch (menuSelection) {
+            case 0:
+                startGame();
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                Gdx.app.exit();
+                System.exit(-1);
+                break;
+            default:
+                break;
+        }
     }
 
     private void startGame() {
@@ -317,6 +356,9 @@ public class Main extends Game {
 
     private void logic() {
         framesElapsed++;
+        if (gameState == State.TITLE) {
+
+        }
         if (gameState == State.GAMEPLAY) {
             timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
             timeRemaining = (float) Math.ceil(timeAllowed - timeElapsed);
@@ -341,7 +383,8 @@ public class Main extends Game {
 
         if (gameState == State.GAMEPLAY) {
             drawMap();
-        } else {
+        } 
+        if (gameState == State.TITLE || gameState == State.PAUSED) {
             drawCheckerPattern();
         }
 
@@ -355,32 +398,35 @@ public class Main extends Game {
         }
 
         renderDebugText();
-        if (gameState == State.TITLE) {
-            renderTitle();
-        }
-        if (gameState == State.PAUSED) {
-            renderPauseScreen();
+        switch (gameState) {
+            case TITLE:
+                renderTitle();
+                break;
+            case GAMEPLAY:
+                renderGameText();
+                break;
+            case PAUSED:
+                renderPauseScreen();
+                break;
+            default:
+                break;
         }
 
         batch.end();
     }
 
     private void drawCheckerPattern() {
-        // Update the offset based on time and speed
         offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
-
-        // Keep the offset within the tile size range to avoid large numbers
         offset %= tileSize;
 
-        // Start drawing the tiles
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Adjust the starting points of x and y based on the offset
+        // adjust x and y based on offset
         for (int y = -tileSize + (int) offset; y < screeninfo.height + tileSize; y += tileSize) {
             for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
                 // pattern
                 if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
-                    shapeRenderer.setColor(gameState == State.PAUSED ? Color.PINK : Color.BLACK);
+                    shapeRenderer.setColor(gameState == State.PAUSED ? Color.PURPLE : Color.BLACK);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 } else {
                     shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
@@ -444,9 +490,11 @@ public class Main extends Game {
             if (i == menuSelection) {
                 menuText = "> " + menuText;
             }
-            boldFont.draw(batch, menuText, 500, (250 - i * 40));
+            boldFont.draw(batch, menuText, 500, (225 - i * 40));
         }
 
+        boldFont.draw(batch, "By windows007", 500, 375);        
+        
         normalFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
     }
 
@@ -459,10 +507,16 @@ public class Main extends Game {
             if (i == menuSelection) {
                 menuText = "> " + menuText;
             }
-            boldFont.draw(batch, menuText, 500, (250 - i * 40));
+            boldFont.draw(batch, menuText, 500, (250 - i * 30));
         }
 
+        normalFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, normalFont.getLineHeight());
+        
         normalFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
+    }
+
+    private void renderGameText() {
+        normalFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, normalFont.getLineHeight());
     }
 
     private void renderDebugText() {
@@ -475,8 +529,6 @@ public class Main extends Game {
         normalFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
 
         normalFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
-
-        normalFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, normalFont.getLineHeight());
     }
 
     @Override
