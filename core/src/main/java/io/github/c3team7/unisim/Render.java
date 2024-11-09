@@ -32,6 +32,19 @@ public class Render {
             getEntities().remove(sprite);
             return true;
         }
+        System.err.println("WARNING! Tried to remove a sprite that doesn't exist! ID: " + sprite.ID);
+        return false;
+    }
+
+    public Boolean removeSpriteByID(int ID) {
+        Sprite sprite = getSpriteByID(ID);
+        if (sprite != null) {
+            if (setOfIDs.remove(ID)) { // check if sprite exists
+                getEntities().remove(sprite);
+                return true;
+            }
+        }
+        System.err.println("WARNING! Tried to remove a sprite that doesn't exist! ID: " + ID);
         return false;
     }
 }

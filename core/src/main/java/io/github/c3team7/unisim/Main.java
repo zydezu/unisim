@@ -293,7 +293,7 @@ public class Main extends Game {
 
     public void destroySpritesByIDs(int[] spriteIDs) {
         for (int id : spriteIDs) {
-            render.getSpriteByID(id).destroy();
+            render.removeSpriteByID(id);
         }
     }
 
