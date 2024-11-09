@@ -130,8 +130,17 @@ public class Main extends Game {
                 Gdx.graphics.getDisplayMode().refreshRate);
         System.out.println(screeninfo); // DEBUG
 
-        // CREATE MAP THEN CREATE ENTITIES FOR MAP
+        initGame();
+    }
 
+    private void initGame() {
+        gameState = State.TITLE;
+        menuSelection = 0;
+        maxMenuOptions = 4;
+
+        timeElapsed = 0;
+
+        // CREATE MAP THEN CREATE ENTITIES FOR MAP
         map = new Map("map.txt"); // generate the map
         map.placeBuilding(map.getIndexFromTileCoords(3, 4), 2, 3);
         map.placeBuilding(0, 1, 1);
@@ -243,6 +252,8 @@ public class Main extends Game {
                             unpauseGame();
                             break;
                         case 1:
+                            restartGame();
+                            //TODO: add a way to restart the game
                             break;
                         case 2:
                             exitToMainMenu();
@@ -292,19 +303,23 @@ public class Main extends Game {
         destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
     }
 
-    private void exitToMainMenu() {
+    private void restartGame() {
         destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
-        gameState = State.TITLE;
-        createTitleAssets();
-        menuSelection = 0;
-        maxMenuOptions = 4;
+        initGame();
+        startGame();
+    }
+
+    private void exitToMainMenu() {
+        // we want to reset all relevant variables to the defaults here
+        destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
+        initGame();
     }
 
     private void logic() {
         framesElapsed++;
         if (gameState == State.GAMEPLAY) {
             timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
-            timeRemaining = timeAllowed - timeElapsed;
+            timeRemaining = (float) Math.ceil(timeAllowed - timeElapsed);
             timeRemainingReadable = convertTimeToReadable(timeRemaining);
         }
     }
