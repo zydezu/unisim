@@ -74,6 +74,16 @@ public class Main extends Game {
     int mouseX = 0;
     int mouseY = 0;
 
+    // menu options
+    String[] menuOptions = {
+            "Start Game",
+            "Instructions",
+            "Options (idk if keep)",
+            "Quit Game"
+    };
+    int menuSelection = 0;
+    int maxMenuOptions = 4;
+
     protected Map map;
     protected Render render;
 
@@ -128,8 +138,12 @@ public class Main extends Game {
 
         // store all sprites entities
         createTitleAssets();
-        
+
         // new Building(map, 50, 100, 0, 150, 150, 0);
+    }
+
+    private void createTitleAssets() {
+        centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
     }
 
     private void setUpFontGenerator() {
@@ -160,10 +174,6 @@ public class Main extends Game {
         generator.dispose();
     }
 
-    private void createTitleAssets() {
-        setSpriteCenterX(new Graphic(render, 0, 400, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
-    }
-
     // boched attempt at keeping 16/9 resizing window
     @Override
     public void resize(int width, int height) {
@@ -174,6 +184,73 @@ public class Main extends Game {
         // Gdx.graphics.setWindowedMode((int)(tempheight * 1.778), height);
 
         // camera.setToOrtho(false, width, height);
+    }
+
+    private void inputs() {
+        // Fullscreen Toggle
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            Boolean fullScreen = Gdx.graphics.isFullscreen();
+            Monitor currMonitor = Gdx.graphics.getMonitor();
+            if (fullScreen) {
+                Gdx.graphics.setWindowedMode(1280, 720);
+            } else {
+                DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
+                if (!Gdx.graphics.setFullscreenMode(displayMode)) {
+                    // failed
+                }
+            }
+        }
+
+        // Manage player inputs here
+        switch (gameState) {
+            case TITLE:
+                // title screen menu selection
+                if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W))
+                    menuSelection -= 1;
+                if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S))
+                    menuSelection += 1;
+                menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
+
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+                    // START GAME
+                    gameState = State.GAMEPLAY;
+
+                    destroySpritesByIDs(new int[] { 1 }); // remove title sprites
+                }
+                break;
+            case PAUSED:
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                    gameState = State.GAMEPLAY;
+                }
+                break;
+            case GAMEPLAY:
+                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                    gameState = State.PAUSED;
+                }
+                break;
+            default:
+                break;
+        }
+
+        // mouse pos
+        mouseX = Gdx.input.getX();
+        mouseY = Gdx.input.getY();
+    }
+
+    private void logic() {
+        framesElapsed++;
+        if (gameState == State.GAMEPLAY) {
+            timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
+            timeRemaining = timeAllowed - timeElapsed;
+            timeRemainingReadable = convertTimeToReadable(timeRemaining);
+        }
+    }
+
+    private String convertTimeToReadable(float seconds) {
+        int minutes = (int) seconds / 60;
+        int tmpSeconds = (int) seconds % 60;
+
+        return String.format("%d:%02d", minutes, tmpSeconds);
     }
 
     private void draw() {
@@ -254,47 +331,46 @@ public class Main extends Game {
         };
     }
 
-    private void logic() {
-        framesElapsed++;
-        if (gameState == State.GAMEPLAY) {
-            timeElapsed = timeElapsed + Gdx.graphics.getDeltaTime();
-            timeRemaining = timeAllowed - timeElapsed;
-            timeRemainingReadable = convertTimeToReadable(timeRemaining);
-        }
+    // Centers a sprite based on the screen dimensions
+    private void centerSprite(Sprite sprite) {
+        float centerX = (Gdx.graphics.getWidth() - sprite.getWidth()) / 2.0f;
+        float centerY = (Gdx.graphics.getHeight() - sprite.getHeight()) / 2.0f;
+        sprite.setPos(centerX, centerY);
     }
 
-    private String convertTimeToReadable(float seconds) {
-        int minutes = (int) seconds / 60;
-        int tmpSeconds = (int) seconds % 60;
-
-        return String.format("%d:%02d", minutes, tmpSeconds);
+    // Overload for setting either X or Y if necessary
+    private void centerSpriteX(Sprite sprite) {
+        float centerX = (Gdx.graphics.getWidth() - sprite.getWidth()) / 2.0f;
+        sprite.setPos(centerX, sprite.rectangle.y); // keep current Y
     }
 
-    // should probably rewrite this entire section
-    private void setSpriteCenterX(Sprite tempSprite) {
-        tempSprite.rectangle.x = getSpriteCenterX(tempSprite);
-    }
-
-    private void setSpriteCenterY(Sprite tempSprite) {
-        tempSprite.rectangle.y = getSpriteCenterY(tempSprite);
-    }
-
-    private void setSpriteCenter(Sprite tempSprite) {
-        tempSprite.setPos(getSpriteCenterX(tempSprite), getSpriteCenterY(tempSprite));
-    }
-
-    private float getSpriteCenterX(Sprite tempSprite) {
-        return (Gdx.graphics.getWidth() - tempSprite.getWidth()) / 2.0f;
-    }
-
-    private float getSpriteCenterY(Sprite tempSprite) {
-        return (Gdx.graphics.getHeight() - tempSprite.getHeight()) / 2.0f;
+    private void centerSpriteY(Sprite sprite) {
+        float centerY = (Gdx.graphics.getHeight() - sprite.getHeight()) / 2.0f;
+        sprite.setPos(sprite.rectangle.x, centerY); // keep current X
     }
 
     public void destroySpritesByIDs(int[] spriteIDs) {
         for (int id : spriteIDs) {
             render.removeSpriteByID(id);
         }
+    }
+
+    private void renderTitle() {
+        String menuText = "";
+        for (int i = 0; i < menuOptions.length; i++) {
+            menuText = menuOptions[i];
+            System.err.println(menuText);
+            if (i == menuSelection) {
+                menuText = "> " + menuText;
+            }
+            currentFont.draw(batch, menuText, 500, (250 - i * 20));
+        }
+
+        currentFont.draw(batch, "Press ENTER to start", 500, 100);
+    }
+
+    private void renderPauseScreen() {
+        currentFont.draw(batch, "PAUSED", 640, 360);
     }
 
     private void renderDebugText() {
@@ -304,75 +380,18 @@ public class Main extends Game {
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
         currentFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
+        currentFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
 
         currentFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
 
         currentFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, currentFont.getLineHeight());
     }
 
-    private void renderTitle() {
-        currentFont.draw(batch, "Start Game", 500, 250);
-        currentFont.draw(batch, "Instructions", 500, 230);
-        currentFont.draw(batch, "Options (idk if keep)", 500, 210);
-        currentFont.draw(batch, "Quit Game", 500, 190);
-        currentFont.draw(batch, "Press ENTER to start", 500, 100);
-    }
-
-    private void renderPauseScreen() {
-        currentFont.draw(batch, "PAUSED", 640, 360);
-    }
-
     @Override
     public void render() {
-        // inputs
-
         inputs();
         logic();
         draw();
-    }
-
-    private void inputs() {
-        // Fullscreen Toggle
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
-            Boolean fullScreen = Gdx.graphics.isFullscreen();
-            Monitor currMonitor = Gdx.graphics.getMonitor();
-            if (fullScreen) {
-                Gdx.graphics.setWindowedMode(1280, 720);
-            } else {
-                DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
-                if (!Gdx.graphics.setFullscreenMode(displayMode)) {
-                    // failed
-                }
-            }
-        }
-
-        // Manage player inputs here
-        switch (gameState) {
-            case TITLE:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-                    // START GAME
-                    gameState = State.GAMEPLAY;
-
-                    destroySpritesByIDs(new int[] { 1 }); // remove title sprites
-                }
-                break;
-            case PAUSED:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                    gameState = State.GAMEPLAY;
-                }
-                break;
-            case GAMEPLAY:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                    gameState = State.PAUSED;
-                }
-                break;
-            default:
-                break;
-        }
-
-        // mouse pos
-        mouseX = Gdx.input.getX();
-        mouseY = Gdx.input.getY();
     }
 
     @Override
