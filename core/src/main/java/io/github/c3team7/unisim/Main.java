@@ -126,9 +126,7 @@ public class Main extends Game {
         normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK); // first font stored
         boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK); // first font stored
 
-        screeninfo = new ScreenInfo(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),
-                Gdx.graphics.getDisplayMode().refreshRate);
-        System.out.println(screeninfo); // DEBUG
+        screeninfo = new ScreenInfo(1280, 720, Gdx.graphics.getDisplayMode().refreshRate);
 
         initGame();
     }
@@ -255,7 +253,7 @@ public class Main extends Game {
                             break;
                         case 1:
                             restartGame();
-                            //TODO: add a way to restart the game
+                            // TODO: add a way to restart the game
                             break;
                         case 2:
                             exitToMainMenu();
