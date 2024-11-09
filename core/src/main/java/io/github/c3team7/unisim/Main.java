@@ -136,8 +136,6 @@ public class Main extends Game {
         map.placeBuilding(2303, 1, 1);
         render = new Render();
 
-        map.exportMap();
-
         // store all sprites entities
         createTitleAssets();
 

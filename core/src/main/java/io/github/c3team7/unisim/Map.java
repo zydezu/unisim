@@ -90,7 +90,7 @@ public class Map {
         return true;
     }
 
-    public void exportMap() {
+    private void exportMap() {
         try {
             FileHandle file = Gdx.files.local("save/export.txt"); // libgdx way to write to a file
 
