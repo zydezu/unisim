@@ -84,7 +84,7 @@ public class Main extends Game {
     String[] menuOptions = { // should probably be moved to a .txt file
             "Start Game",
             "Instructions",
-            "Options (idk if keep)",
+            "Options",
             "Exit to Desktop"
     };
     String[] pauseOptions = { // should probably be moved to a .txt file
@@ -162,9 +162,6 @@ public class Main extends Game {
         for (int i = 0; i < menuOptions.length; i++) {
             layout.setText(boldFont, menuOptions[i]);
 
-            System.err.println(500 + " " + (225 - i * 40) + " to > " + (500 + layout.width) + " "
-                    + ((225 - i * 40) + layout.height));
-
             optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height * 2));
         }
         // new Building(map, 50, 100, 0, 150, 150, 0);
@@ -234,52 +231,12 @@ public class Main extends Game {
             case TITLE:
                 // title screen menu selection
                 menuSelectionInputs();
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-                    selectMenuOption(menuSelection);
-                }
-
-                for (int i = 0; i < optionRects.size(); i++) {
-                    if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
-                        menuSelection = i;
-                        break;
-                    }
-                }
-
-                if (Gdx.input.justTouched()) {
-                    System.err.println(mouseX + ", " + mouseY);
-
-                    // FIXME: fix this
-                    for (int i = 0; i < optionRects.size(); i++) {
-                        if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
-                            menuSelection = i;
-                            System.err.println("SELECT" + menuSelection);
-                            selectMenuOption(menuSelection);
-                            break;
-                        }
-                    }
-                }
                 break;
             case PAUSED:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     unpauseGame();
                 }
                 menuSelectionInputs();
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-                    switch (menuSelection) {
-                        case 0:
-                            unpauseGame();
-                            break;
-                        case 1:
-                            restartGame();
-                            // TODO: add a way to restart the game
-                            break;
-                        case 2:
-                            exitToMainMenu();
-                            break;
-                        default:
-                            break;
-                    }
-                }
                 break;
             case GAMEPLAY:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
@@ -297,23 +254,64 @@ public class Main extends Game {
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S))
             menuSelection += 1;
         menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            selectMenuOption(menuSelection);
+        }
+
+        // mouse
+        for (int i = 0; i < optionRects.size(); i++) {
+            if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
+                menuSelection = i;
+                break;
+            }
+        }
+        if (Gdx.input.justTouched()) {
+            System.err.println(mouseX + ", " + mouseY);
+
+            // FIXME: fix this
+            for (int i = 0; i < optionRects.size(); i++) {
+                if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
+                    menuSelection = i;
+                    System.err.println("SELECT" + menuSelection);
+                    selectMenuOption(menuSelection);
+                    break;
+                }
+            }
+        }
     }
 
     private void selectMenuOption(int menuSelection) {
-        switch (menuSelection) {
-            case 0:
-                startGame();
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                Gdx.app.exit();
-                System.exit(-1);
-                break;
-            default:
-                break;
+        if (gameState == gameState.TITLE) {
+            switch (menuSelection) {
+                case 0:
+                    startGame();
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    Gdx.app.exit();
+                    System.exit(-1);
+                    break;
+                default:
+                    break;
+            }
+        } else if (gameState == gameState.PAUSED) {
+            switch (menuSelection) {
+                case 0:
+                    unpauseGame();
+                    break;
+                case 1:
+                    restartGame();
+                    break;
+                case 2:
+                    exitToMainMenu();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -324,6 +322,14 @@ public class Main extends Game {
     }
 
     private void pauseGame() {
+        optionRects.clear();
+        GlyphLayout layout = new GlyphLayout();
+        for (int i = 0; i < pauseOptions.length; i++) {
+            layout.setText(boldFont, pauseOptions[i]);
+
+            optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height * 2));
+        }
+
         gameState = State.PAUSED;
         menuSelection = 0;
         maxMenuOptions = 3;
@@ -380,6 +386,7 @@ public class Main extends Game {
         switch (gameState) {
             case TITLE:
                 drawCheckerPattern();
+                drawOptionBoxes();
                 break;
             case GAMEPLAY:
                 drawMap();
@@ -387,6 +394,7 @@ public class Main extends Game {
                 break;
             case PAUSED:
                 drawCheckerPattern();
+                drawOptionBoxes();
                 break;
             default:
                 break;
@@ -418,6 +426,25 @@ public class Main extends Game {
         batch.end();
     }
 
+    private void drawOptionBoxes() {
+        // needed for transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (int i = 0; i < optionRects.size(); i++) {
+            if (i == menuSelection) {
+                shapeRenderer.setColor(1f, 1f, 1f, 0.8f);
+            } else {
+                shapeRenderer.setColor(0, 0, 0, 0.8f);
+            }
+            shapeRenderer.rect(535, (195 - i * 40), 300, 36);
+        }
+
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
     private void drawCheckerPattern() {
         offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
         offset %= tileSize;
@@ -438,16 +465,6 @@ public class Main extends Game {
             }
         }
         shapeRenderer.end();
-
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(0, 0, 0, 0.5f);
-        for (int i = 0; i < optionRects.size(); i++) {
-            shapeRenderer.rect(550, (200 - i * 40), 150, 38);
-        }
-        shapeRenderer.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     public void drawClockIcon(float x, float y, float radius, float degrees) {
@@ -514,9 +531,6 @@ public class Main extends Game {
         String menuText = "";
         for (int i = 0; i < menuOptions.length; i++) {
             menuText = menuOptions[i];
-            if (i == menuSelection) {
-                menuText = "> " + menuText;
-            }
             boldFont.draw(batch, menuText, 550, (225 - i * 40));
         }
 
@@ -531,22 +545,20 @@ public class Main extends Game {
         String menuText = "";
         for (int i = 0; i < pauseOptions.length; i++) {
             menuText = pauseOptions[i];
-            if (i == menuSelection) {
-                menuText = "> " + menuText;
-            }
-            boldFont.draw(batch, menuText, 500, (250 - i * 30));
+            boldFont.draw(batch, menuText, 550, (225 - i * 40));
         }
 
         boldFont.draw(batch, "PAUSED", 640, 360);
 
         renderTime();
 
-        drawCenteredText(normalFont, batch, "Use UP and DOWN to select an option", 640, 50);
+        drawCenteredText(normalFont, batch, "Use UP/DOWN to select an option", 640, 50);
         drawCenteredText(normalFont, batch, "Press ENTER to select an option", 640, 30);
     }
 
     private void renderGameText() {
         renderTime();
+        normalFont.draw(batch, "Can't place here!", mouseX, mouseY);
     }
 
     private void renderTime() {
