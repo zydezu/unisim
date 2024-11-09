@@ -155,7 +155,6 @@ public class Main extends Game {
 
     private void createTitleAssets() {
         centerSpriteX(new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png")); // create + center
-        new Graphic(render, 0, 350, 0f, 1f, 1, "graphics/unisimlogo.png"); // create + center
     }
 
     private void createPauseAssets() {
@@ -418,19 +417,19 @@ public class Main extends Game {
 
     // Centers a sprite based on the screen dimensions
     private void centerSprite(Sprite sprite) {
-        float centerX = (Gdx.graphics.getWidth() - sprite.getWidth()) / 2.0f;
-        float centerY = (Gdx.graphics.getHeight() - sprite.getHeight()) / 2.0f;
+        float centerX = (screeninfo.width - sprite.getWidth()) / 2.0f;
+        float centerY = (screeninfo.height - sprite.getHeight()) / 2.0f;
         sprite.setPos(centerX, centerY);
     }
 
     // Overload for setting either X or Y if necessary
     private void centerSpriteX(Sprite sprite) {
-        float centerX = (Gdx.graphics.getWidth() - sprite.getWidth()) / 2.0f;
+        float centerX = (screeninfo.width - sprite.getWidth()) / 2.0f;
         sprite.setPos(centerX, sprite.rectangle.y); // keep current Y
     }
 
     private void centerSpriteY(Sprite sprite) {
-        float centerY = (Gdx.graphics.getHeight() - sprite.getHeight()) / 2.0f;
+        float centerY = (screeninfo.height - sprite.getHeight()) / 2.0f;
         sprite.setPos(sprite.rectangle.x, centerY); // keep current X
     }
 
