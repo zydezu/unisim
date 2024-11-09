@@ -89,7 +89,7 @@ public class Main extends Game {
             "Restart",
             "Quit Game"
     };
-    ArrayList<Rectangle> optionRects = new ArrayList<>();    
+    ArrayList<Rectangle> optionRects = new ArrayList<>();
     int menuSelection = 0;
     int maxMenuOptions = 4;
 
@@ -127,8 +127,8 @@ public class Main extends Game {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
-        normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK); // first font stored
-        boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK); // first font stored
+        normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK);
+        boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK);
 
         screeninfo = new ScreenInfo(1280, 720, Gdx.graphics.getDisplayMode().refreshRate);
 
@@ -157,7 +157,8 @@ public class Main extends Game {
         for (int i = 0; i < menuOptions.length; i++) {
             layout.setText(boldFont, menuOptions[i]);
 
-            System.err.println(500 + " " + (225 - i * 40) + " " + " to > " + (500 + layout.width) +  " " + ((225 - i * 40) + layout.height));
+            System.err.println(500 + " " + (225 - i * 40) + " " + " to > " + (500 + layout.width) + " "
+                    + ((225 - i * 40) + layout.height));
 
             optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height));
         }
@@ -381,15 +382,22 @@ public class Main extends Game {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        if (gameState == State.GAMEPLAY) {
-            drawMap();
-        } 
-        if (gameState == State.TITLE || gameState == State.PAUSED) {
-            drawCheckerPattern();
+        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end to stay ontop )
+        switch (gameState) {
+            case TITLE:
+                drawCheckerPattern();
+                break;
+            case GAMEPLAY:
+                drawMap();
+                drawClockIcon(1170, 690, 12, ((timeElapsed % 60) * -6) + 90);
+                break;
+            case PAUSED:
+                drawCheckerPattern();
+                break;
+            default:
+                break;
         }
 
-        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end as we want to
-        // draw it ontop of the sprites )
         batch.begin();
 
         // draw sprites first
@@ -397,7 +405,7 @@ public class Main extends Game {
             sprite.draw(batch, Gdx.graphics.getDeltaTime());
         }
 
-        renderDebugText();
+        // text must be rendered as part of the batch
         switch (gameState) {
             case TITLE:
                 renderTitle();
@@ -411,6 +419,7 @@ public class Main extends Game {
             default:
                 break;
         }
+        renderDebugText();
 
         batch.end();
     }
@@ -434,6 +443,21 @@ public class Main extends Game {
                 }
             }
         }
+        shapeRenderer.end();
+    }
+
+    public void drawClockIcon(float x, float y, float radius, float degrees) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.WHITE);
+        shapeRenderer.circle(x, y, radius); 
+        shapeRenderer.end();
+
+        // end point of the clock hand
+        float handX = x + radius * 0.7f * (float) Math.cos(Math.toRadians(degrees));
+        float handY = y + radius * 0.7f * (float) Math.sin(Math.toRadians(degrees));
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.rectLine(x, y, handX, handY, 2);
         shapeRenderer.end();
     }
 
@@ -492,14 +516,13 @@ public class Main extends Game {
             boldFont.draw(batch, menuText, 500, (225 - i * 40));
         }
 
-        boldFont.draw(batch, "By windows007", 500, 375);        
-        
-        normalFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
+        boldFont.draw(batch, "By windows007", 500, 375);
+
+        drawCenteredText(normalFont, batch, "Use UP and DOWN to select an option", 640, 50);
+        drawCenteredText(normalFont, batch, "Press ENTER to select an option", 640, 30);
     }
 
     private void renderPauseScreen() {
-        boldFont.draw(batch, "PAUSED", 640, 360);
-
         String menuText = "";
         for (int i = 0; i < pauseOptions.length; i++) {
             menuText = pauseOptions[i];
@@ -509,13 +532,21 @@ public class Main extends Game {
             boldFont.draw(batch, menuText, 500, (250 - i * 30));
         }
 
-        normalFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, normalFont.getLineHeight());
-        
-        normalFont.draw(batch, "Use UP and DOWN to select an option\nPress ENTER to select an option", 500, 50);
+        boldFont.draw(batch, "PAUSED", 640, 360);
+
+        renderTime();
+
+        drawCenteredText(normalFont, batch, "Use UP and DOWN to select an option", 640, 50);
+        drawCenteredText(normalFont, batch, "Press ENTER to select an option", 640, 30);
     }
 
     private void renderGameText() {
-        normalFont.draw(batch, "TIME REMAINING: " + timeRemainingReadable, 0, normalFont.getLineHeight());
+        renderTime();
+    }
+
+    private void renderTime() {
+        drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1270, 700);
+        drawRightAlignedText(normalFont, batch, "Time remaining", 1270, 670);
     }
 
     private void renderDebugText() {
@@ -530,6 +561,19 @@ public class Main extends Game {
         normalFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
     }
 
+    public void drawCenteredText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
+        GlyphLayout layout = new GlyphLayout(font, text);
+        float adjustedX = x - layout.width / 2;
+        // float adjustedY = y + layout.height / 2;
+        font.draw(batch, layout, adjustedX, y);
+    }    
+
+    public void drawRightAlignedText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
+        GlyphLayout layout = new GlyphLayout(font, text);
+        float adjustedX = x - layout.width;
+        font.draw(batch, layout, adjustedX, y);
+    }
+
     @Override
     public void render() {
         inputs();
@@ -540,5 +584,8 @@ public class Main extends Game {
     @Override
     public void dispose() {
         shapeRenderer.dispose();
+        batch.dispose();
+        normalFont.dispose();
+        boldFont.dispose();
     }
 }
