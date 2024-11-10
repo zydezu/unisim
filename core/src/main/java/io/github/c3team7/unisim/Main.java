@@ -200,6 +200,16 @@ public class Main extends Game {
         new Graphic(render, -50, -50, 0f, 1f, 102,
                 "graphics/mouse/cross.png");
 
+        // create building icons
+        new Graphic(render, -1000, -1000, 0f, 1f, 110,
+                "graphics/buildings/test.jpg");
+        new Graphic(render, -1000, -1000, 0f, 1f, 111,
+                "graphics/buildings/test.jpg");
+        new Graphic(render, -1000, -1000, 0f, 1f, 112,
+                "graphics/buildings/test.jpg");
+        new Graphic(render, -1000, -1000, 0f, 1f, 113,
+                "graphics/buildings/test.jpg");
+
         // get rects for each menu option to select with mouse
         optionRects.clear();
         GlyphLayout layout = new GlyphLayout();
@@ -278,27 +288,28 @@ public class Main extends Game {
                     pauseGame();
                 }
 
-                if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
                     buildingMenuOpen = true;
                     selectedBuildingIndex = -1;
                 }
-                if (selectedBuildingIndex != -1){
+                if (selectedBuildingIndex != -1) {
                     Building building = buildingPresets.get(selectedBuildingIndex);
                     int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
                     int mouseTileX = mouseTileCoords[0];
                     int mouseTileY = mouseTileCoords[1];
 
-                    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
-                        boolean canPlaceBuilding = map.canPlaceBuilding(map.getIndexFromTileCoords(mouseTileX, mouseTileY), building.getWidth(), building.getHeight());
-                        if (canPlaceBuilding){
+                    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                        boolean canPlaceBuilding = map.canPlaceBuilding(
+                                map.getIndexFromTileCoords(mouseTileX, mouseTileY), building.getWidth(),
+                                building.getHeight());
+                        if (canPlaceBuilding) {
                             placeBuilding(building, mouseTileCoords[0], mouseTileCoords[1]);
                             buildingMenuOpen = true;
                             selectedBuildingIndex = -1;
-                        }
-                        else{
+                        } else {
                             showCanPlaceBuilding = true;
                             Timer timer = new Timer();
-                            timer.scheduleTask(new Timer.Task(){
+                            timer.scheduleTask(new Timer.Task() {
                                 @Override
                                 public void run() {
                                     showCanPlaceBuilding = false;
@@ -553,19 +564,22 @@ public class Main extends Game {
                 renderGameText();
                 if (buildingMenuOpen) {
                     renderBuildingSelectionText();
-                    render.getSpriteByID(101).moveOffScreen();
-                    render.getSpriteByID(102).moveOffScreen();
+                    hideSpritesByID(new int[] { 101, 102 });
+                    // render building icons that go above text
+                    for (int i = 0; i < buildingPresetNames.length; i++) {
+                        render.getSpriteByID(110 + i).setPos(25 + (i * 150), 45);
+                    }
                 } else {
                     render.getSpriteByID(101).setPos(mouseX - 15, mouseY - 25);
                     render.getSpriteByID(102).setPos(mouseX + 12, mouseY - 25);
 
+                    hideSpritesByID(new int[] { 110, 111, 112, 113 });
                 }
 
                 break;
             case PAUSED:
                 // move tick and cross offscreen
-                render.getSpriteByID(101).moveOffScreen();
-                render.getSpriteByID(102).moveOffScreen();
+                hideGameSprites();
                 renderPauseScreen();
                 break;
             case GAMEOVER:
@@ -586,6 +600,18 @@ public class Main extends Game {
         }
 
         batch.end();
+    }
+
+    public void hideSpritesByID(int[] spriteIDs) {
+        for (int id : spriteIDs) {
+            if (render.setOfIDs.contains(id)) {
+                render.getSpriteByID(id).moveOffScreen();
+            }
+        }
+    }
+
+    private void hideGameSprites() {
+        hideSpritesByID(new int[] { 101, 102, 110, 111, 112, 113 });
     }
 
     private void drawBuildingTransBox() {
@@ -805,7 +831,7 @@ public class Main extends Game {
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
         drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
 
-        if (showCanPlaceBuilding){
+        if (showCanPlaceBuilding) {
             smallFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
         }
 
