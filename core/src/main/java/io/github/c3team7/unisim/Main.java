@@ -66,7 +66,7 @@ public class Main extends Game {
     private float timeElapsed = 0;
     private float timeRemaining = 0;
     private String timeRemainingReadable = "";
-    private final float timeAllowed = 300;
+    private final float timeAllowed = 1;
 
     // mouse position
     float mouseX = 0;
@@ -93,6 +93,10 @@ public class Main extends Game {
     // building menu
     private Boolean buildingMenuOpen = true;
     private boolean showCanPlaceBuilding = false;
+    int accomodationcount = 0;
+    int cafeteriacount = 0;
+    int coursecount = 0;
+    int recreationalcount = 0;
 
     // menu options
     private String[] menuOptions = { // should probably be moved to a .txt file
@@ -126,6 +130,8 @@ public class Main extends Game {
     private int tileSize = 50;
     private float scrollSpeed = 50f; // Speed of scrolling in pixels per second
     private float offset = 0f; // Horizontal offset for scrolling
+
+    private Boolean showDebugText = false;
 
     @Override
     public void create() {
@@ -264,15 +270,18 @@ public class Main extends Game {
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = Gdx.input.getY(); // match sprite and text pos
-
         mouseX = mouseX * (RESOLUTIONX / (float) Gdx.graphics.getWidth());
         mouseY = mouseY * (RESOLUTIONY / (float) Gdx.graphics.getHeight());
         mouseY = RESOLUTIONY - mouseY;
+
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
         }
 
+        // TODO: remove debug toggle
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
+            showDebugText = !showDebugText;
         // Manage player inputs here
         switch (gameState) {
             case TITLE:
@@ -587,6 +596,7 @@ public class Main extends Game {
                 renderPauseScreen();
                 break;
             case GAMEOVER:
+                hideGameSprites();
                 drawMapTiles();
                 batch.end();
                 drawTransMenuBoxes();
@@ -596,7 +606,9 @@ public class Main extends Game {
             default:
                 break;
         }
-        renderDebugText();
+        if (showDebugText) {
+            renderDebugText();
+        }
 
         // draw sprites first
         for (Sprite sprite : new ArrayList<>(render.getEntities())) {
@@ -646,7 +658,7 @@ public class Main extends Game {
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        if (gameState == State.PAUSED) {
+        if (gameState == State.PAUSED || gameState == State.GAMEOVER) {
             shapeRenderer.setColor(0, 0, 0, 0.6f);
             shapeRenderer.rect(0, 0, 1280, 720);
         }
@@ -782,6 +794,7 @@ public class Main extends Game {
         }
 
         extraBoldFont.draw(batch, "Main Menu", 20, 700);
+        smallFont.draw(batch, "Welcome to unisim!", 20, 660);
         drawRotatedText(boldFont, batch, "By windows007", 655, 380, 9);
 
         // 640 is 1/2 of 1280 (center of screen)
@@ -792,16 +805,15 @@ public class Main extends Game {
     }
 
     private void renderPauseScreen() {
+        renderTime();
+
+        drawCenteredText(extraBoldFont, batch, "Paused", 640, 475);
+
         String menuText = "";
         for (int i = 0; i < pauseOptions.length; i++) {
             menuText = pauseOptions[i];
             mediumFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
-
-        extraBoldFont.draw(batch, "Pause Menu", 20, 700);
-
-        renderTime();
-
         drawCenteredText(normalFont, batch, "Use UP or DOWN to select an option", 640, 50);
         drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
@@ -809,10 +821,10 @@ public class Main extends Game {
     private void renderGameText() {
         renderTime();
 
-        int accomodationcount = 0;
-        int cafeteriacount = 0;
-        int coursecount = 0;
-        int recreationalcount = 0;
+        accomodationcount = 0;
+        cafeteriacount = 0;
+        coursecount = 0;
+        recreationalcount = 0;
 
         for (Building building : buildings) {
             if (building.isAccomodationBuilding())
@@ -855,16 +867,27 @@ public class Main extends Game {
     }
 
     private void renderGameOverText() {
+        drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
+        drawRightAlignedText(smallFont, batch, "Time's up!", 1270, 670);
+
+        drawCenteredText(extraBoldFont, batch, "Game over!", 640, 600);
+
+        drawCenteredText(boldFont, batch, "Stats", 640, 460);
+        drawCenteredText(smallFont, batch, "Buildings placed: " + String.valueOf(buildings.size()), 640, 420);
+        drawCenteredText(smallFont, batch, accomodationcount + " accommodation", 640, 400);
+        drawCenteredText(smallFont, batch, cafeteriacount + " cafeteria", 640, 380);
+        drawCenteredText(smallFont, batch, coursecount + " course", 640, 360);
+        drawCenteredText(smallFont, batch, recreationalcount + " recreational", 640, 340);
+
+        drawCenteredText(smallFont, batch, "50% satisfaction", 640, 290);
+
         String menuText = "";
         for (int i = 0; i < gameOverOptions.length; i++) {
             menuText = gameOverOptions[i];
             mediumFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
-
-        drawCenteredText(extraBoldFont, batch, "Game over!", 640, 450);
-
-        drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
-        drawRightAlignedText(smallFont, batch, "Time's up!", 1270, 670);
+        drawCenteredText(normalFont, batch, "Use UP or DOWN to select an option", 640, 50);
+        drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
 
     private void renderDebugText() {
@@ -875,11 +898,8 @@ public class Main extends Game {
 
         smallFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
         smallFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
-
         smallFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
-
         smallFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
-
         smallFont.draw(batch, "current selected building: " + selectedBuildingIndex, 0, 450);
     }
 
@@ -899,21 +919,17 @@ public class Main extends Game {
     public void drawRotatedText(BitmapFont font, SpriteBatch batch, String text, float x, float y, float angleDegrees) {
         batch.end();
 
-        // set affine transformation to rotate text
-        Affine2 transform = new Affine2();
-        transform.translate(x, y); // Move to the rotation origin
-        transform.rotate(angleDegrees); // Apply rotation
-        transform.translate(-x, -y); // Move back to original position
+        Affine2 transform = new Affine2(); // affine transformation to rotate text
+        transform.translate(x, y); // move to the rotation origin
+        transform.rotate(angleDegrees); // apply rotation
+        transform.translate(-x, -y); // move back to original position
 
-        // transform.shear(0, (float)Math.sin(globalTimeElapsed) * 0.008f);
         // apply transformation matrix to batch
         batch.setTransformMatrix(batch.getTransformMatrix().setAsAffine(transform));
 
         batch.begin();
         font.draw(batch, text, x, y); // draw text with rotation
-
-        // Reset the transformation matrix to avoid affecting other drawings
-        batch.end();
+        batch.end(); // reset transformation matrix
         batch.setTransformMatrix(batch.getTransformMatrix().idt());
         batch.begin();
     }
