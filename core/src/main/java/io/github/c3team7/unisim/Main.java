@@ -1,6 +1,7 @@
 package io.github.c3team7.unisim;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -21,6 +22,9 @@ import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import io.github.c3team7.unisim.Building.Building;
+
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
@@ -87,6 +91,10 @@ public class Main extends Game {
             "Restart",
             "Quit Game"
     };
+    String[] gameOverOptions = { // should probably be moved to a .txt file
+            "Restart",
+            "Quit Game"
+    };
     ArrayList<Rectangle> optionRects = new ArrayList<>();
     int menuSelection = 0;
     int maxMenuOptions = 4;
@@ -95,6 +103,10 @@ public class Main extends Game {
 
     protected Map map;
     protected Render render;
+
+    // buildings
+    private List<Building> buildings;
+    private List<Building> buildingPresets;
 
     // tile scrolling effect
     int tileSize = 50;
@@ -138,9 +150,18 @@ public class Main extends Game {
 
         // CREATE MAP THEN CREATE ENTITIES FOR MAP
         map = new Map("map.txt"); // generate the map
-        map.placeBuilding(map.getIndexFromTileCoords(3, 4), 2, 3);
-        map.placeBuilding(0, 1, 1);
-        map.placeBuilding(2303, 1, 1);
+
+        // init lists
+        buildings = new ArrayList<>(10);
+        buildingPresets = new ArrayList<>();
+
+        // add building to presets
+        Building building = new Building(4, 8);
+        building.setAccommodationBuilding();
+
+        buildingPresets.add(building);
+
+        // actual rendering
         render = new Render();
 
         // store all sprites entities
@@ -207,16 +228,7 @@ public class Main extends Game {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             map.placeBuilding(map.getIndexFromTileCoords(3, 4), 20, 30);
 
-            Boolean fullScreen = Gdx.graphics.isFullscreen();
-            Monitor currMonitor = Gdx.graphics.getMonitor();
-            if (fullScreen) {
-                Gdx.graphics.setWindowedMode(1280, 720);
-            } else {
-                DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
-                if (!Gdx.graphics.setFullscreenMode(displayMode)) {
-                    // failed
-                }
-            }
+            toggleFullscreen();
         }
 
         // Manage player inputs here
@@ -235,9 +247,38 @@ public class Main extends Game {
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     pauseGame();
                 }
+
+                for (int i = Input.Keys.NUM_0; i <= Input.Keys.NUM_9; i++) {
+                    if (Gdx.input.isKeyJustPressed(i)) {
+                        int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
+                        Building newBuilding = buildingPresets.get(i - Input.Keys.NUM_0);
+                        placeBuilding(mouseTileCoords[0], mouseTileCoords[1], newBuilding.getWidth(),
+                                newBuilding.getHeight());
+                    }
+                }
+
                 break;
+            case GAMEOVER:
+                menuSelectionInputs();
             default:
                 break;
+        }
+    }
+
+    private int[] convertMouseCoordsToTileCoords(float mouseX, float mouseY){
+        return new int[]{(int) mouseX / map.TILE_SIZE, (int) mouseY / map.TILE_SIZE};
+    }
+
+    private void toggleFullscreen() {
+        Boolean fullScreen = Gdx.graphics.isFullscreen();
+        Monitor currMonitor = Gdx.graphics.getMonitor();
+        if (fullScreen) {
+            Gdx.graphics.setWindowedMode(1280, 720);
+        } else {
+            DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
+            if (!Gdx.graphics.setFullscreenMode(displayMode)) {
+                // failed
+            }
         }
     }
 
@@ -260,8 +301,6 @@ public class Main extends Game {
             }
         }
         if (Gdx.input.justTouched()) {
-            System.err.println(mouseX + ", " + mouseY);
-
             for (int i = 0; i < optionRects.size(); i++) {
                 if (optionRects.get(i).contains(mouseX, mouseY)) {
                     menuSelection = i;
@@ -281,6 +320,7 @@ public class Main extends Game {
                 case 1:
                     break;
                 case 2:
+                    toggleFullscreen();
                     break;
                 case 3:
                     Gdx.app.exit();
@@ -298,6 +338,17 @@ public class Main extends Game {
                     restartGame();
                     break;
                 case 2:
+                    exitToMainMenu();
+                    break;
+                default:
+                    break;
+            }
+        } else if (gameState == State.GAMEOVER) {
+            switch (menuSelection) {
+                case 0:
+                    restartGame();
+                    break;
+                case 1:
                     exitToMainMenu();
                     break;
                 default:
@@ -344,17 +395,45 @@ public class Main extends Game {
         initGame();
     }
 
+    private void gameOverMenuOptions() {
+        optionRects.clear();
+        GlyphLayout layout = new GlyphLayout();
+        for (int i = 0; i < gameOverOptions.length; i++) {
+            layout.setText(boldFont, gameOverOptions[i]);
+
+            optionRects.add(new Rectangle(menuOptionInitx - 15, (menuOptionInity - 32 - i * 40), 300, 32));
+        }
+        menuSelection = 0;
+        maxMenuOptions = 2;
+    }
+
     private void logic() {
         framesElapsed++;
         globalTimeElapsed += Gdx.graphics.getDeltaTime();
-        if (gameState == State.TITLE) {
-
-        }
         if (gameState == State.GAMEPLAY) {
             timeElapsed += Gdx.graphics.getDeltaTime();
             timeRemaining = (float) Math.ceil(timeAllowed - timeElapsed);
-            timeRemainingReadable = convertTimeToReadable(timeRemaining);
+            if (timeRemaining < 0) {
+                timeRemainingReadable = "0:00";
+                gameState = State.GAMEOVER;
+                gameOverMenuOptions();
+            } else {
+                timeRemainingReadable = convertTimeToReadable(timeRemaining);
+            }
         }
+    }
+
+    private boolean placeBuilding(int index, int width, int height) {
+        if (!map.placeBuilding(index, width, height)) {
+            return false;
+        }
+        Building building = new Building(index, width, height);
+        buildings.add(building);
+        return true;
+    }
+
+    private boolean placeBuilding(int x, int y, int width, int height) {
+        return placeBuilding(map.getIndexFromTileCoords(x, y), width, height);
     }
 
     private String convertTimeToReadable(float seconds) {
@@ -388,6 +467,8 @@ public class Main extends Game {
                 drawTransBoxes();
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 break;
+            case GAMEOVER:
+                break;
             default:
                 break;
         }
@@ -414,6 +495,13 @@ public class Main extends Game {
             case PAUSED:
                 renderPauseScreen();
                 break;
+            case GAMEOVER:
+                drawMapTiles();
+                renderGameOverText();
+                batch.end();
+                drawTransBoxes();
+                drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
+                batch.begin();
             default:
                 break;
         }
@@ -491,9 +579,10 @@ public class Main extends Game {
     private void drawMapTiles() {
         for (int y = 0; y < map.HEIGHT; y++) {
             for (int x = 0; x < map.WIDTH; x++) {
-                // (int) (Math.random() * 2)
-                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed + x*x + y*y) + 1) * 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE,
+                        TILE_SIZE);
+                // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed * x*x + y*y) + 1) *
+                // 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
@@ -588,7 +677,39 @@ public class Main extends Game {
     private void renderGameText() {
         renderTime();
 
-        drawRightAlignedText(boldFont, batch, "0", 1270, 630);
+        int numberOfAccomodationBuildings = 0;
+        int numberOfCafeteriaBuildings = 0;
+        int numberOfCourseBuildings = 0;
+        int numberOfRecreationalBuildings = 0;
+
+        for (Building building : buildings) {
+            if (building.isAccomodationBuilding()) {
+                numberOfAccomodationBuildings++;
+            }
+
+            if (building.isCafeteriaBuilding()) {
+                numberOfCafeteriaBuildings++;
+            }
+
+            if (building.isCourseBuilding()) {
+                numberOfCourseBuildings++;
+            }
+
+            if (building.isRecreationalBuilding()) {
+                numberOfRecreationalBuildings++;
+            }
+        }
+
+        // smallTextFont.draw(batch, "NUMBER OF ACCOMMODATION BUILDINGS PLACED: " + numberOfAccomodationBuildings,
+        //         0, 680);
+        // smallTextFont.draw(batch, "NUMBER OF CAFETERIA BUILDINGS PLACED: " + numberOfCafeteriaBuildings,
+        //         0, 660);
+        // smallTextFont.draw(batch, "NUMBER OF COURSE BUILDINGS PLACED: " + numberOfCourseBuildings,
+        //         0, 640);
+        // smallTextFont.draw(batch, "NUMBER OF RECREATIONAL BUILDINGS PLACED: " + numberOfRecreationalBuildings,
+        //         0, 620);
+
+        drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
         drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 600);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 560);
@@ -600,6 +721,19 @@ public class Main extends Game {
     private void renderTime() {
         drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
         drawRightAlignedText(smallTextFont, batch, "Time remaining", 1270, 670);
+    }
+
+    private void renderGameOverText() {
+        String menuText = "";
+        for (int i = 0; i < gameOverOptions.length; i++) {
+            menuText = gameOverOptions[i];
+            mediumFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
+        }
+
+        drawCenteredText(extraBoldFont, batch, "GAME OVER!", 640, 360);
+
+        drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
+        drawRightAlignedText(smallTextFont, batch, "Time's up!", 1270, 670);
     }
 
     private void renderDebugText() {
