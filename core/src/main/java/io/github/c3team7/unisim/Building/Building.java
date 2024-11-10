@@ -29,6 +29,32 @@ public class Building {
         this.height = height;
     }
 
+    public Building(Building building, int index){
+        if (building.exists()){
+            throw new IllegalArgumentException("Building index should be -1");
+        }
+
+        this.index = index;
+        this.width = building.getWidth();
+        this.height = building.getHeight();
+
+        if (building.isAccomodationBuilding()){
+            setAccommodationBuilding();
+        }
+
+        if (building.isCafeteriaBuilding()){
+            setCafeteriaBuilding();
+        }
+
+        if (building.isCourseBuilding()){
+            setCourseBuilding();
+        }
+
+        if (building.isRecreationalBuilding()){
+            setRecreationalBuilding();
+        }
+    }
+
     public boolean exists() {
         return index != -1;
     }

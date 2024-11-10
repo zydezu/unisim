@@ -252,8 +252,8 @@ public class Main extends Game {
                     if (Gdx.input.isKeyJustPressed(i)) {
                         int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
                         Building newBuilding = buildingPresets.get(i - Input.Keys.NUM_0);
-                        placeBuilding(mouseTileCoords[0], mouseTileCoords[1], newBuilding.getWidth(),
-                                newBuilding.getHeight());
+                        System.out.println(newBuilding.isAccomodationBuilding());
+                        placeBuilding(newBuilding, mouseTileCoords[0], mouseTileCoords[1]);
                     }
                 }
 
@@ -423,17 +423,15 @@ public class Main extends Game {
         }
     }
 
-    private boolean placeBuilding(int index, int width, int height) {
-        if (!map.placeBuilding(index, width, height)) {
+    private boolean placeBuilding(Building building, int x, int y){
+        int index = map.getIndexFromTileCoords(x, y);
+        if (!map.placeBuilding(index, building.getWidth(), building.getHeight())){
             return false;
         }
-        Building building = new Building(index, width, height);
-        buildings.add(building);
-        return true;
-    }
 
-    private boolean placeBuilding(int x, int y, int width, int height) {
-        return placeBuilding(map.getIndexFromTileCoords(x, y), width, height);
+        Building newBuilding = new Building(building, index);
+        buildings.add(newBuilding);
+        return true;
     }
 
     private String convertTimeToReadable(float seconds) {
