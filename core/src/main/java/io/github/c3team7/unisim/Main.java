@@ -77,8 +77,8 @@ public class Main extends Game {
     private final float timeAllowed = 300;
 
     // mouse position
-    int mouseX = 0;
-    int mouseY = 0;
+    float mouseX = 0;
+    float mouseY = 0;
 
     // menu options
     String[] menuOptions = { // should probably be moved to a .txt file
@@ -95,6 +95,8 @@ public class Main extends Game {
     ArrayList<Rectangle> optionRects = new ArrayList<>();
     int menuSelection = 0;
     int maxMenuOptions = 4;
+    int menuOptionInitx = 550;
+    int menuOptionInity = 225;
 
     protected Map map;
     protected Render render;
@@ -162,7 +164,7 @@ public class Main extends Game {
         for (int i = 0; i < menuOptions.length; i++) {
             layout.setText(boldFont, menuOptions[i]);
 
-            optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height * 2));
+            optionRects.add(new Rectangle(menuOptionInitx - 15, (menuOptionInity - 32 - i * 40), 300, 32));
         }
         // new Building(map, 50, 100, 0, 150, 150, 0);
     }
@@ -209,6 +211,10 @@ public class Main extends Game {
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = screeninfo.height - Gdx.input.getY(); // match sprite and text pos
+        // Vector3 mousePosition = new Vector3(mouseX, mouseY, 0);
+        // camera.unproject(mousePosition);
+        // mouseX = mousePosition.x;
+        // mouseX = mousePosition.y;
 
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
@@ -261,7 +267,7 @@ public class Main extends Game {
 
         // mouse
         for (int i = 0; i < optionRects.size(); i++) {
-            if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
+            if (optionRects.get(i).contains(mouseX, mouseY)) {
                 menuSelection = i;
                 break;
             }
@@ -271,7 +277,7 @@ public class Main extends Game {
 
             // FIXME: fix this
             for (int i = 0; i < optionRects.size(); i++) {
-                if (optionRects.get(i).contains(mouseX, mouseY + 30)) {
+                if (optionRects.get(i).contains(mouseX, mouseY)) {
                     menuSelection = i;
                     System.err.println("SELECT" + menuSelection);
                     selectMenuOption(menuSelection);
@@ -327,7 +333,7 @@ public class Main extends Game {
         for (int i = 0; i < pauseOptions.length; i++) {
             layout.setText(boldFont, pauseOptions[i]);
 
-            optionRects.add(new Rectangle(500, (225 - i * 40), layout.width, layout.height * 2));
+            optionRects.add(new Rectangle(menuOptionInitx - 50, (menuOptionInity - i * 40), layout.width, layout.height * 2));
         }
 
         gameState = State.PAUSED;
@@ -531,7 +537,7 @@ public class Main extends Game {
         String menuText = "";
         for (int i = 0; i < menuOptions.length; i++) {
             menuText = menuOptions[i];
-            boldFont.draw(batch, menuText, 550, (225 - i * 40));
+            boldFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
 
         drawRotatedText(boldFont, batch, "By windows007", 655, 380, 9);
@@ -545,7 +551,7 @@ public class Main extends Game {
         String menuText = "";
         for (int i = 0; i < pauseOptions.length; i++) {
             menuText = pauseOptions[i];
-            boldFont.draw(batch, menuText, 550, (225 - i * 40));
+            boldFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
 
         boldFont.draw(batch, "PAUSED", 640, 360);
