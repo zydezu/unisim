@@ -85,20 +85,25 @@ public class Map {
     public boolean placeBuilding(int index, int width, int height) {
         int startRow = index / WIDTH;
         int startCol = index % WIDTH;
-    
+
         if (startCol + width > WIDTH || startRow + height > HEIGHT) {
             System.err.println("WARNING! Tried to place a building but it would go out of bounds!");
             return false; // building will go out of bounds
         }
-    
-        // place building
+
+        int[] oldMap = map.clone();
+
         for (int rowStart = index, row = 0; row < height; row++, rowStart += WIDTH) {
             for (int column = 0; column < width; column++) {
+                if (map[rowStart + column] != 1){
+                    map = oldMap;
+                    return false;
+                }
                 map[rowStart + column] = 3;
             }
         }
         return true;
-    }    
+    }
 
     private void exportMap() {
         try {
