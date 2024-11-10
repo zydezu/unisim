@@ -114,6 +114,10 @@ public class Map {
         return true;
     }
 
+    public boolean isIndexOutOfBounds(int index){
+        return (index < 0 || index >= map.length);
+    }
+
     private void exportMap() {
         try {
             FileHandle file = Gdx.files.local("save/export.txt"); // libgdx way to write to a file

@@ -651,15 +651,34 @@ public class Main extends Game {
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         Building building = buildingPresets.get(selectedBuildingIndex);
+        int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
+        int mouseTileX = mouseTileCoords[0];
+        int mouseTileY = mouseTileCoords[1];
+        int index = map.getIndexFromTileCoords(mouseTileX, mouseTileY);
 
-        shapeRenderer.setColor(0, 0, 0, 0.6f); // draw filled
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.rect(
-                (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
-                (int) (mouseY / map.TILE_SIZE) * map.TILE_SIZE,
-                building.getWidth() * map.TILE_SIZE,
-                building.getHeight() * map.TILE_SIZE);
+        for (int rowStart = index, row = 0; row < building.getHeight(); row++, rowStart += map.WIDTH) {
+            for (int column = 0; column < building.getWidth(); column++) {
+                if (map.isIndexOutOfBounds(rowStart + column)){
+                    continue;
+                }
+                if (map.get(rowStart + column) != 1) {
+                    shapeRenderer.setColor(1f, 0, 0, 0.6f); // draw filled
+                }
+                else{
+                    shapeRenderer.setColor(0, 1f, 0, 0.6f); // draw filled
+                }
+                int tileX;
+                int tileY;
+
+                int[] tileCoords = map.getTileCoordsFromIndex(rowStart + column);
+                tileX = tileCoords[0];
+                tileY = tileCoords[1];
+                shapeRenderer.rect(tileX * map.TILE_SIZE, tileY * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
+            }
+        }
         shapeRenderer.end();
+
 
         shapeRenderer.setColor(1, 1, 1, 1); // draw outline
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
