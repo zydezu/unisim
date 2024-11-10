@@ -265,8 +265,8 @@ public class Main extends Game {
         }
     }
 
-    private int[] convertMouseCoordsToTileCoords(float mouseX, float mouseY){
-        return new int[]{(int) mouseX / map.TILE_SIZE, (int) mouseY / map.TILE_SIZE};
+    private int[] convertMouseCoordsToTileCoords(float mouseX, float mouseY) {
+        return new int[] { (int) mouseX / map.TILE_SIZE, (int) mouseY / map.TILE_SIZE };
     }
 
     private void toggleFullscreen() {
@@ -677,40 +677,38 @@ public class Main extends Game {
     private void renderGameText() {
         renderTime();
 
-        int numberOfAccomodationBuildings = 0;
-        int numberOfCafeteriaBuildings = 0;
-        int numberOfCourseBuildings = 0;
-        int numberOfRecreationalBuildings = 0;
+        int accomodationcount, cafeteriacount, coursecount, recreationalcount = 0;
 
         for (Building building : buildings) {
-            if (building.isAccomodationBuilding()) {
-                numberOfAccomodationBuildings++;
-            }
-
-            if (building.isCafeteriaBuilding()) {
-                numberOfCafeteriaBuildings++;
-            }
-
-            if (building.isCourseBuilding()) {
-                numberOfCourseBuildings++;
-            }
-
-            if (building.isRecreationalBuilding()) {
-                numberOfRecreationalBuildings++;
-            }
+            if (building.isAccomodationBuilding())
+                accomodationcount++;
+            if (building.isCafeteriaBuilding())
+                cafeteriacount++;
+            if (building.isCourseBuilding())
+                coursecount++;
+            if (building.isRecreationalBuilding())
+                recreationalcount++;
         }
 
-        // smallTextFont.draw(batch, "NUMBER OF ACCOMMODATION BUILDINGS PLACED: " + numberOfAccomodationBuildings,
-        //         0, 680);
-        // smallTextFont.draw(batch, "NUMBER OF CAFETERIA BUILDINGS PLACED: " + numberOfCafeteriaBuildings,
-        //         0, 660);
-        // smallTextFont.draw(batch, "NUMBER OF COURSE BUILDINGS PLACED: " + numberOfCourseBuildings,
-        //         0, 640);
-        // smallTextFont.draw(batch, "NUMBER OF RECREATIONAL BUILDINGS PLACED: " + numberOfRecreationalBuildings,
-        //         0, 620);
+        // smallTextFont.draw(batch, "NUMBER OF ACCOMMODATION BUILDINGS PLACED: " +
+        // numberOfAccomodationBuildings,
+        // 0, 680);
+        // smallTextFont.draw(batch, "NUMBER OF CAFETERIA BUILDINGS PLACED: " +
+        // numberOfCafeteriaBuildings,
+        // 0, 660);
+        // smallTextFont.draw(batch, "NUMBER OF COURSE BUILDINGS PLACED: " +
+        // numberOfCourseBuildings,
+        // 0, 640);
+        // smallTextFont.draw(batch, "NUMBER OF RECREATIONAL BUILDINGS PLACED: " +
+        // numberOfRecreationalBuildings,
+        // 0, 620);
 
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
-        drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 600);
+        drawRightAlignedText(smallTextFont, batch, accomodationcount + " accommodation", 1270, 600);
+        drawRightAlignedText(smallTextFont, batch, cafeteriacount + " cafeteria", 1270, 580);
+        drawRightAlignedText(smallTextFont, batch, coursecount + " course", 1270, 560);
+        drawRightAlignedText(smallTextFont, batch, recreationalcount + " recreational", 1270, 540);
+        drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 520);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 560);
         drawRightAlignedText(smallTextFont, batch, "Satisfaction rating", 1270, 530);
