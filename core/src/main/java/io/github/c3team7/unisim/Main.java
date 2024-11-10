@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -117,6 +118,7 @@ public class Main extends Game {
 
     // building menu
     private Boolean buildingMenuOpen = true;
+    private boolean showCanPlaceBuilding = false;
 
     // ArrayList<String> buildingPresetNames = new ArrayList<>();
 
@@ -254,7 +256,6 @@ public class Main extends Game {
         mouseX = mouseX * (RESOLUTIONX / (float) Gdx.graphics.getWidth());
         mouseY = mouseY * (RESOLUTIONY / (float) Gdx.graphics.getHeight());
         mouseY = RESOLUTIONY - mouseY;
-
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
@@ -277,6 +278,37 @@ public class Main extends Game {
                     pauseGame();
                 }
 
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
+                    buildingMenuOpen = true;
+                    selectedBuildingIndex = -1;
+                }
+                if (selectedBuildingIndex != -1){
+                    Building building = buildingPresets.get(selectedBuildingIndex);
+                    int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
+                    int mouseTileX = mouseTileCoords[0];
+                    int mouseTileY = mouseTileCoords[1];
+
+                    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
+                        boolean canPlaceBuilding = map.canPlaceBuilding(map.getIndexFromTileCoords(mouseTileX, mouseTileY), building.getWidth(), building.getHeight());
+                        if (canPlaceBuilding){
+                            placeBuilding(building, mouseTileCoords[0], mouseTileCoords[1]);
+                            buildingMenuOpen = true;
+                            selectedBuildingIndex = -1;
+                        }
+                        else{
+                            showCanPlaceBuilding = true;
+                            Timer timer = new Timer();
+                            timer.scheduleTask(new Timer.Task(){
+                                @Override
+                                public void run() {
+                                    showCanPlaceBuilding = false;
+                                }
+                            }, 1f);
+                        }
+
+                    }
+                }
+
                 if (buildingMenuOpen) {
                     if (Gdx.input.justTouched()) {
                         if (mouseY <= 150) {
@@ -286,16 +318,6 @@ public class Main extends Game {
                         }
                     }
                 }
-
-                for (int i = Input.Keys.NUM_0; i <= Input.Keys.NUM_9; i++) {
-                    if (Gdx.input.isKeyJustPressed(i)) {
-                        int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
-                        Building newBuilding = buildingPresets.get(i - Input.Keys.NUM_0);
-                        System.out.println(newBuilding.isAccomodationBuilding());
-                        placeBuilding(newBuilding, mouseTileCoords[0], mouseTileCoords[1]);
-                    }
-                }
-
                 break;
             case GAMEOVER:
                 menuSelectionInputs();
@@ -531,11 +553,12 @@ public class Main extends Game {
                 renderGameText();
                 if (buildingMenuOpen) {
                     renderBuildingSelectionText();
+                    render.getSpriteByID(101).moveOffScreen();
+                    render.getSpriteByID(102).moveOffScreen();
+                } else {
                     render.getSpriteByID(101).setPos(mouseX - 15, mouseY - 25);
                     render.getSpriteByID(102).setPos(mouseX + 12, mouseY - 25);
-                } else {
-                    render.getSpriteByID(101).moveOffScreen();
-                    render.getSpriteByID(102).moveOffScreen();    
+
                 }
 
                 break;
@@ -782,7 +805,10 @@ public class Main extends Game {
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
         drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
 
-        smallFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
+        if (showCanPlaceBuilding){
+            smallFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
+        }
+
     }
 
     private void renderBuildingSelectionText() {

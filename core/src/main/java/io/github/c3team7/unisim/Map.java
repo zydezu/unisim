@@ -82,23 +82,32 @@ public class Map {
      * @return true if the building was successfully placed
      * @return false if the building cannot be placed
      */
-    public boolean placeBuilding(int index, int width, int height) {
+
+    public boolean canPlaceBuilding(int index, int width, int height){
         int startRow = index / WIDTH;
         int startCol = index % WIDTH;
 
         if (startCol + width > WIDTH || startRow + height > HEIGHT) {
-            System.err.println("WARNING! Tried to place a building but it would go out of bounds!");
             return false; // building will go out of bounds
         }
 
-        int[] oldMap = map.clone();
+        for (int rowStart = index, row = 0; row < height; row++, rowStart += WIDTH) {
+            for (int column = 0; column < width; column++) {
+                if (map[rowStart + column] != 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+
+    }
+    public boolean placeBuilding(int index, int width, int height) {
+        if (!canPlaceBuilding(index, width, height)){
+            return false;
+        }
 
         for (int rowStart = index, row = 0; row < height; row++, rowStart += WIDTH) {
             for (int column = 0; column < width; column++) {
-                if (map[rowStart + column] != 1){
-                    map = oldMap;
-                    return false;
-                }
                 map[rowStart + column] = 3;
             }
         }
