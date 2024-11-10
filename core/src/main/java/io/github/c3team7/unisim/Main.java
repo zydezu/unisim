@@ -66,7 +66,7 @@ public class Main extends Game {
     private float timeElapsed = 0;
     private float timeRemaining = 0;
     private String timeRemainingReadable = "";
-    private final float timeAllowed = 1;
+    private final float timeAllowed = 300;
 
     // mouse position
     float mouseX = 0;
@@ -99,6 +99,7 @@ public class Main extends Game {
     int recreationalcount = 0;
 
     // menu options
+    private Boolean currentlyShowingInstructions = false;
     private String[] menuOptions = { // should probably be moved to a .txt file
             "Start Game",
             "Instructions",
@@ -285,6 +286,7 @@ public class Main extends Game {
         // Manage player inputs here
         switch (gameState) {
             case TITLE:
+
                 // title screen menu selection
                 menuSelectionInputs();
                 break;
@@ -375,22 +377,29 @@ public class Main extends Game {
         menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            selectMenuOption(menuSelection);
+            if (currentlyShowingInstructions) {
+                render.removeSpriteByID(300);
+                currentlyShowingInstructions = false;
+            } else {
+                selectMenuOption(menuSelection);
+            }
         }
 
         // mouse
-        for (int i = 0; i < optionRects.size(); i++) {
-            if (optionRects.get(i).contains(mouseX, mouseY)) {
-                menuSelection = i;
-                break;
-            }
-        }
-        if (Gdx.input.justTouched()) {
+        if (!currentlyShowingInstructions) {
             for (int i = 0; i < optionRects.size(); i++) {
                 if (optionRects.get(i).contains(mouseX, mouseY)) {
                     menuSelection = i;
-                    selectMenuOption(menuSelection);
                     break;
+                }
+            }
+            if (Gdx.input.justTouched()) {
+                for (int i = 0; i < optionRects.size(); i++) {
+                    if (optionRects.get(i).contains(mouseX, mouseY)) {
+                        menuSelection = i;
+                        selectMenuOption(menuSelection);
+                        break;
+                    }
                 }
             }
         }
@@ -403,6 +412,9 @@ public class Main extends Game {
                     startGame();
                     break;
                 case 1:
+                    new Graphic(render, 0, 0, 0f, 1f, 300,
+                            "graphics/instructions.jpg");
+                    currentlyShowingInstructions = true;
                     break;
                 case 2:
                     toggleFullscreen();
@@ -420,6 +432,7 @@ public class Main extends Game {
                     unpauseGame();
                     break;
                 case 1:
+                    destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
                     restartGame();
                     break;
                 case 2:
@@ -469,7 +482,6 @@ public class Main extends Game {
     }
 
     private void restartGame() {
-        destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
         initGame();
         startGame();
     }
