@@ -96,7 +96,7 @@ public class Main extends Game {
     ArrayList<Rectangle> optionRects = new ArrayList<>();
     int menuSelection = 0;
     int maxMenuOptions = 4;
-    int menuOptionInitx = 550;
+    int menuOptionInitx = 510;
     int menuOptionInity = 225;
 
     protected Map map;
@@ -193,11 +193,11 @@ public class Main extends Game {
     private void inputs() {
         // mouse pos
         mouseX = Gdx.input.getX();
-        mouseY = RESOLUTIONY - Gdx.input.getY(); // match sprite and text pos
-        Vector3 mousePosition = new Vector3(mouseX, mouseY, 0);
-        camera.unproject(mousePosition);
-        mouseX = (float)Math.ceil(mousePosition.x);
-        mouseY = (float)Math.ceil(mousePosition.y);
+        mouseY = Gdx.input.getY(); // match sprite and text pos
+        
+        mouseX = mouseX * (RESOLUTIONX / (float) Gdx.graphics.getWidth());
+        mouseY = mouseY * (RESOLUTIONY / (float) Gdx.graphics.getHeight());
+        mouseY = RESOLUTIONY - mouseY;
 
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
@@ -316,7 +316,7 @@ public class Main extends Game {
         for (int i = 0; i < pauseOptions.length; i++) {
             layout.setText(boldFont, pauseOptions[i]);
 
-            optionRects.add(new Rectangle(menuOptionInitx - 50, (menuOptionInity - i * 40), layout.width, layout.height * 2));
+            optionRects.add(new Rectangle(menuOptionInitx - 15, (menuOptionInity - 32 - i * 40), 300, 32));
         }
 
         gameState = State.PAUSED;
@@ -427,7 +427,7 @@ public class Main extends Game {
             } else {
                 shapeRenderer.setColor(0, 0, 0, 0.8f);
             }
-            shapeRenderer.rect(535, (195 - i * 40), 300, 36);
+            shapeRenderer.rect(menuOptionInitx - 15, (menuOptionInity - 30 - i * 40), 300, 36);
         }
 
         shapeRenderer.end();
@@ -547,7 +547,7 @@ public class Main extends Game {
 
     private void renderGameText() {
         renderTime();
-        normalFont.draw(batch, "Can't place here!", mouseX, mouseY);
+        normalFont.draw(batch, "Can't place here!", mouseX - 30, mouseY + 30);
     }
 
     private void renderTime() {
@@ -565,6 +565,8 @@ public class Main extends Game {
         normalFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
 
         normalFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
+        
+        normalFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
     }
 
     public void drawCenteredText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
