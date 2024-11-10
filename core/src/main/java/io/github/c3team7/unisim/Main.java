@@ -535,7 +535,7 @@ public class Main extends Game {
 
                 }
 
-                if (!buildingMenuOpen) {
+                if (buildingMenuOpen) {
                     render.getSpriteByID(101).setPos(mouseX - 15, mouseY - 25);
                     render.getSpriteByID(102).setPos(mouseX + 12, mouseY - 25);
                 }
