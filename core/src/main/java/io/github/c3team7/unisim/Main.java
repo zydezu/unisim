@@ -56,7 +56,8 @@ public class Main extends Game {
     private BitmapFont normalFont;
     private BitmapFont boldFont;
 
-    ScreenInfo screeninfo; // debug
+    private final int RESOLUTIONX = 1280;
+    private final int RESOLUTIONY = 720;
 
     // game state
     enum State {
@@ -106,28 +107,12 @@ public class Main extends Game {
     float scrollSpeed = 50f; // Speed of scrolling in pixels per second
     float offset = 0f; // Horizontal offset for scrolling
 
-    class ScreenInfo {
-        public ScreenInfo(int width, int height, int refresh) {
-            this.width = width;
-            this.height = height;
-            this.refresh = refresh;
-        }
-
-        public String toString() {
-            return String.format("Resolution: %1$s x %2$s @ %3$s Hz", width, height, refresh); // string formatting
-        }
-
-        int width;
-        int height;
-        int refresh;
-    }
-
     @Override
     public void create() {
         // setting up camera
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1280, 720);
-        viewport = new FitViewport(1280, 720, camera);
+        camera.setToOrtho(false, RESOLUTIONX, RESOLUTIONY);
+        viewport = new FitViewport(RESOLUTIONX, RESOLUTIONY, camera);
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
@@ -135,8 +120,6 @@ public class Main extends Game {
 
         normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK);
         boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK);
-
-        screeninfo = new ScreenInfo(1280, 720, Gdx.graphics.getDisplayMode().refreshRate);
 
         initGame();
     }
@@ -210,11 +193,11 @@ public class Main extends Game {
     private void inputs() {
         // mouse pos
         mouseX = Gdx.input.getX();
-        mouseY = screeninfo.height - Gdx.input.getY(); // match sprite and text pos
-        // Vector3 mousePosition = new Vector3(mouseX, mouseY, 0);
-        // camera.unproject(mousePosition);
-        // mouseX = mousePosition.x;
-        // mouseX = mousePosition.y;
+        mouseY = RESOLUTIONY - Gdx.input.getY(); // match sprite and text pos
+        Vector3 mousePosition = new Vector3(mouseX, mouseY, 0);
+        camera.unproject(mousePosition);
+        mouseX = (float)Math.ceil(mousePosition.x);
+        mouseY = (float)Math.ceil(mousePosition.y);
 
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
@@ -458,8 +441,8 @@ public class Main extends Game {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // adjust x and y based on offset
-        for (int y = -tileSize + (int) offset; y < screeninfo.height + tileSize; y += tileSize) {
-            for (int x = -tileSize + (int) offset; x < screeninfo.width + tileSize; x += tileSize) {
+        for (int y = -tileSize + (int) offset; y < RESOLUTIONY + tileSize; y += tileSize) {
+            for (int x = -tileSize + (int) offset; x < RESOLUTIONX + tileSize; x += tileSize) {
                 // pattern
                 if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
                     shapeRenderer.setColor(gameState == State.PAUSED ? Color.PURPLE : Color.BLACK);
@@ -511,19 +494,19 @@ public class Main extends Game {
 
     // Centers a sprite based on the screen dimensions
     private void centerSprite(Sprite sprite) {
-        float centerX = (screeninfo.width - sprite.getWidth()) / 2.0f;
-        float centerY = (screeninfo.height - sprite.getHeight()) / 2.0f;
+        float centerX = (RESOLUTIONX - sprite.getWidth()) / 2.0f;
+        float centerY = (RESOLUTIONY - sprite.getHeight()) / 2.0f;
         sprite.setPos(centerX, centerY);
     }
 
     // Overload for setting either X or Y if necessary
     private void centerSpriteX(Sprite sprite) {
-        float centerX = (screeninfo.width - sprite.getWidth()) / 2.0f;
+        float centerX = (RESOLUTIONX - sprite.getWidth()) / 2.0f;
         sprite.setPos(centerX, sprite.rectangle.y); // keep current Y
     }
 
     private void centerSpriteY(Sprite sprite) {
-        float centerY = (screeninfo.height - sprite.getHeight()) / 2.0f;
+        float centerY = (RESOLUTIONY - sprite.getHeight()) / 2.0f;
         sprite.setPos(sprite.rectangle.x, centerY); // keep current X
     }
 
