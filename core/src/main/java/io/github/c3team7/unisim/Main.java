@@ -531,17 +531,18 @@ public class Main extends Game {
                 renderGameText();
                 if (buildingMenuOpen) {
                     renderBuildingSelectionText();
-                } else {
-
-                }
-
-                if (buildingMenuOpen) {
                     render.getSpriteByID(101).setPos(mouseX - 15, mouseY - 25);
                     render.getSpriteByID(102).setPos(mouseX + 12, mouseY - 25);
+                } else {
+                    render.getSpriteByID(101).moveOffScreen();
+                    render.getSpriteByID(102).moveOffScreen();    
                 }
 
                 break;
             case PAUSED:
+                // move tick and cross offscreen
+                render.getSpriteByID(101).moveOffScreen();
+                render.getSpriteByID(102).moveOffScreen();
                 renderPauseScreen();
                 break;
             case GAMEOVER:

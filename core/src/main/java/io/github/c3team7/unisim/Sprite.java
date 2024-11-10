@@ -43,6 +43,11 @@ public abstract class Sprite {
         this.angle = angle;
     }
 
+    protected void moveOffScreen() {
+        rectangle.x = -1000;
+        rectangle.y = -1000;
+    }
+
     public float getWidth() {
         return rectangle.width;
     }
