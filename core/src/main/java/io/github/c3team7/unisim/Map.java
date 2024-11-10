@@ -1,7 +1,5 @@
 package io.github.c3team7.unisim;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Arrays;
 
 import com.badlogic.gdx.Gdx;

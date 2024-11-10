@@ -10,7 +10,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -18,20 +17,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.ui.List;
-import com.badlogic.gdx.utils.Scaling;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
@@ -43,7 +30,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 
 public class Main extends Game {
     private OrthographicCamera camera;
-    private OrthographicCamera hudCamera;
     private Viewport viewport;
 
     private ShapeRenderer shapeRenderer;
@@ -53,8 +39,7 @@ public class Main extends Game {
     // fonts
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
-    private BitmapFont normalFont;
-    private BitmapFont boldFont;
+    private BitmapFont normalFont, smallTextFont, mediumFont, boldFont, extraBoldFont;
 
     private final int RESOLUTIONX = 1280;
     private final int RESOLUTIONY = 720;
@@ -88,6 +73,12 @@ public class Main extends Game {
             "Options",
             "Exit to Desktop"
     };
+    String[] menuOptionsExplanations = { // should probably be moved to a .txt file
+            "Start a new simulation!",
+            "View how to play",
+            "Enable fullscreen, etc...",
+            "Close the game"
+    };
     String[] pauseOptions = { // should probably be moved to a .txt file
             "Continue",
             "Restart",
@@ -118,8 +109,11 @@ public class Main extends Game {
         batch = new SpriteBatch();
         batch.enableBlending();
 
-        normalFont = createFont("fonts/segoeui.ttf", 20, Color.WHITE, 1, Color.BLACK);
+        normalFont = createFont("fonts/Montserrat-Regular.ttf", 20, Color.WHITE, 1, Color.BLACK);
+        smallTextFont = createFont("fonts/Montserrat-Medium.ttf", 18, Color.WHITE, 1, Color.BLACK);
+        mediumFont = createFont("fonts/Montserrat-Medium.ttf", 32, Color.WHITE, 1, Color.BLACK);
         boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK);
+        extraBoldFont = createFont("fonts/Montserrat-Black.ttf", 48, Color.WHITE, 1, Color.BLACK);
 
         initGame();
     }
@@ -171,7 +165,6 @@ public class Main extends Game {
         parameter.borderWidth = borderwidth;
         parameter.borderColor = bordercolor;
 
-        parameter.genMipMaps = true;
         parameter.minFilter = TextureFilter.Linear;
         parameter.magFilter = TextureFilter.Linear;
 
@@ -194,7 +187,7 @@ public class Main extends Game {
         // mouse pos
         mouseX = Gdx.input.getX();
         mouseY = Gdx.input.getY(); // match sprite and text pos
-        
+
         mouseX = mouseX * (RESOLUTIONX / (float) Gdx.graphics.getWidth());
         mouseY = mouseY * (RESOLUTIONY / (float) Gdx.graphics.getHeight());
         mouseY = RESOLUTIONY - mouseY;
@@ -258,11 +251,9 @@ public class Main extends Game {
         if (Gdx.input.justTouched()) {
             System.err.println(mouseX + ", " + mouseY);
 
-            // FIXME: fix this
             for (int i = 0; i < optionRects.size(); i++) {
                 if (optionRects.get(i).contains(mouseX, mouseY)) {
                     menuSelection = i;
-                    System.err.println("SELECT" + menuSelection);
                     selectMenuOption(menuSelection);
                     break;
                 }
@@ -375,15 +366,17 @@ public class Main extends Game {
         switch (gameState) {
             case TITLE:
                 drawCheckerPattern();
-                drawOptionBoxes();
+                drawTransBoxes();
                 break;
             case GAMEPLAY:
                 drawMap();
-                drawClockIcon(1170, 690, 12, ((timeElapsed % 60) * -6) + 90);
+                drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 break;
             case PAUSED:
+                drawMap();
                 drawCheckerPattern();
-                drawOptionBoxes();
+                drawTransBoxes();
+                drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 break;
             default:
                 break;
@@ -415,11 +408,16 @@ public class Main extends Game {
         batch.end();
     }
 
-    private void drawOptionBoxes() {
+    private void drawTransBoxes() {
         // needed for transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        if (gameState == State.PAUSED) {
+            shapeRenderer.setColor(0, 0, 0, 0.6f);
+            shapeRenderer.rect(0, 0, 1280, 720);
+        }
 
         for (int i = 0; i < optionRects.size(); i++) {
             if (i == menuSelection) {
@@ -435,6 +433,10 @@ public class Main extends Game {
     }
 
     private void drawCheckerPattern() {
+        // needed for transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
         offset %= tileSize;
 
@@ -443,17 +445,18 @@ public class Main extends Game {
         // adjust x and y based on offset
         for (int y = -tileSize + (int) offset; y < RESOLUTIONY + tileSize; y += tileSize) {
             for (int x = -tileSize + (int) offset; x < RESOLUTIONX + tileSize; x += tileSize) {
-                // pattern
                 if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
-                    shapeRenderer.setColor(gameState == State.PAUSED ? Color.PURPLE : Color.BLACK);
+                    shapeRenderer.setColor(0f, 0f, 0f, gameState == State.PAUSED ? 0.25f : 1f);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 } else {
-                    shapeRenderer.setColor(0.8f, 0.2f, 0.2f, 1f);
+                    shapeRenderer.setColor(0.8f, 0.2f, 0.2f, gameState == State.PAUSED ? 0.25f : 1f);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 }
             }
         }
+
         shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     public void drawClockIcon(float x, float y, float radius, float degrees) {
@@ -520,53 +523,63 @@ public class Main extends Game {
         String menuText = "";
         for (int i = 0; i < menuOptions.length; i++) {
             menuText = menuOptions[i];
-            boldFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
+            mediumFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
 
+        extraBoldFont.draw(batch, "Main Menu", 20, 700);
         drawRotatedText(boldFont, batch, "By windows007", 655, 380, 9);
 
         // 640 is 1/2 of 1280 (center of screen)
-        drawCenteredText(normalFont, batch, "Use UP and DOWN to select an option", 640, 50);
-        drawCenteredText(normalFont, batch, "Press ENTER to select an option", 640, 30);
+        drawCenteredText(normalFont, batch, menuOptionsExplanations[menuSelection], 640, 270);
+
+        drawCenteredText(normalFont, batch, "Use UP or DOWN to select an option", 640, 50);
+        drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
 
     private void renderPauseScreen() {
         String menuText = "";
         for (int i = 0; i < pauseOptions.length; i++) {
             menuText = pauseOptions[i];
-            boldFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
+            mediumFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
 
-        boldFont.draw(batch, "PAUSED", 640, 360);
+        extraBoldFont.draw(batch, "Pause Menu", 20, 700);
 
         renderTime();
 
-        drawCenteredText(normalFont, batch, "Use UP/DOWN to select an option", 640, 50);
-        drawCenteredText(normalFont, batch, "Press ENTER to select an option", 640, 30);
+        drawCenteredText(normalFont, batch, "Use UP or DOWN to select an option", 640, 50);
+        drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
 
     private void renderGameText() {
         renderTime();
-        normalFont.draw(batch, "Can't place here!", mouseX - 30, mouseY + 30);
+
+        drawRightAlignedText(boldFont, batch, "0", 1270, 630);
+        drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 600);
+
+        drawRightAlignedText(boldFont, batch, "50%", 1270, 560);
+        drawRightAlignedText(smallTextFont, batch, "Satisfaction rating", 1270, 530);
+
+        smallTextFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
     }
 
     private void renderTime() {
-        drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1270, 700);
-        drawRightAlignedText(normalFont, batch, "Time remaining", 1270, 670);
+        drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
+        drawRightAlignedText(smallTextFont, batch, "Time remaining", 1270, 670);
     }
 
     private void renderDebugText() {
-        normalFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
-        normalFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
-        normalFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
+        smallTextFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
+        smallTextFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
+        smallTextFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
-        normalFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
-        normalFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
+        smallTextFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
+        smallTextFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
 
-        normalFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
-        
-        normalFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
+        smallTextFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
+
+        smallTextFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
     }
 
     public void drawCenteredText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
