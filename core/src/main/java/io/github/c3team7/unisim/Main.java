@@ -492,14 +492,14 @@ public class Main extends Game {
         for (int y = 0; y < map.HEIGHT; y++) {
             for (int x = 0; x < map.WIDTH; x++) {
                 // (int) (Math.random() * 2)
-                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                // batch.draw(tiles[0][(int) (Math.random() * 5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                // batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed + x*x + y*y) + 1) * 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
 
-    private TextureRegion getTileFromUID(int uid) {
-        return switch (uid) {
+    private TextureRegion getTileFromUID(int UID) {
+        return switch (UID) {
             case 0 -> tiles[0][4]; // unknown texture
             case 1 -> tiles[0][0]; // grass
             case 2 -> tiles[0][1]; // water
@@ -519,8 +519,8 @@ public class Main extends Game {
         shapeRenderer.end();
     }
 
-    private Color getColourFromUID(int uid) {
-        return switch (uid) {
+    private Color getColourFromUID(int UID) {
+        return switch (UID) {
             case 0 -> Color.PURPLE;
             case 1 -> Color.GREEN;
             case 2 -> Color.BLUE;
