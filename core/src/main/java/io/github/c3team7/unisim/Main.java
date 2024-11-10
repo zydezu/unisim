@@ -38,14 +38,12 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 public class Main extends Game {
     private OrthographicCamera camera;
     private Viewport viewport;
-
     private ShapeRenderer shapeRenderer;
-
     private SpriteBatch batch;
 
     // fonts
-    FreeTypeFontGenerator generator;
-    FreeTypeFontParameter parameter;
+    private FreeTypeFontGenerator generator;
+    private FreeTypeFontParameter parameter;
     private BitmapFont normalFont, smallerFont, smallFont, mediumFont, boldFont, extraBoldFont;
 
     private final int RESOLUTIONX = 1280;
@@ -65,70 +63,69 @@ public class Main extends Game {
     // timer
     int framesElapsed = 0;
     float globalTimeElapsed = 0;
-    float timeElapsed = 0;
-    float timeRemaining = 0;
-    String timeRemainingReadable = "";
+    private float timeElapsed = 0;
+    private float timeRemaining = 0;
+    private String timeRemainingReadable = "";
     private final float timeAllowed = 300;
 
     // mouse position
     float mouseX = 0;
     float mouseY = 0;
 
-    // menu options
-    String[] menuOptions = { // should probably be moved to a .txt file
-            "Start Game",
-            "Instructions",
-            "Options",
-            "Exit to Desktop"
-    };
-    String[] menuOptionsExplanations = { // should probably be moved to a .txt file
-            "Start a new simulation!",
-            "View how to play",
-            "Enable fullscreen, etc...",
-            "Close the game"
-    };
-    String[] pauseOptions = { // should probably be moved to a .txt file
-            "Continue",
-            "Restart",
-            "Quit Game"
-    };
-    String[] gameOverOptions = { // should probably be moved to a .txt file
-            "Restart",
-            "Quit Game"
-    };
-    ArrayList<Rectangle> optionRects = new ArrayList<>();
-    int menuSelection = 0;
-    int maxMenuOptions = 4;
-    int menuOptionInitx = 510;
-    int menuOptionInity = 225;
-
+    // map, sprites and tileset
     protected Map map;
     protected Render render;
+    private Texture tileset;
+    private TextureRegion[][] tiles;
 
     // buildings
     private List<Building> buildings;
     private List<Building> buildingPresets;
-    String[] buildingPresetNames = { // should probably be moved to a .txt file
+    private String[] buildingPresetNames = { // should probably be moved to a .txt file
             "Accomodation\nBuilding #1",
             "Cafeteria\nBuilding #2",
             "Course\nBuilding #3",
             "Recreational\nBuilding #3",
     };
+    // ArrayList<String> buildingPresetNames = new ArrayList<>();
     private int selectedBuildingIndex = -1;
 
     // building menu
     private Boolean buildingMenuOpen = true;
     private boolean showCanPlaceBuilding = false;
 
-    // ArrayList<String> buildingPresetNames = new ArrayList<>();
+    // menu options
+    private String[] menuOptions = { // should probably be moved to a .txt file
+            "Start Game",
+            "Instructions",
+            "Options",
+            "Exit to Desktop"
+    };
+    private String[] menuOptionsExplanations = { // should probably be moved to a .txt file
+            "Start a new simulation!",
+            "View how to play",
+            "Enable fullscreen, etc...",
+            "Close the game"
+    };
+    private String[] pauseOptions = { // should probably be moved to a .txt file
+            "Continue",
+            "Restart",
+            "Quit Game"
+    };
+    private String[] gameOverOptions = { // should probably be moved to a .txt file
+            "Restart",
+            "Quit Game"
+    };
+    private ArrayList<Rectangle> optionRects = new ArrayList<>();
+    private int menuSelection = 0;
+    private int maxMenuOptions = 4;
+    private int menuOptionInitx = 510;
+    private int menuOptionInity = 225;
 
     // tile scrolling effect
-    int tileSize = 50;
-    float scrollSpeed = 50f; // Speed of scrolling in pixels per second
-    float offset = 0f; // Horizontal offset for scrolling
-
-    private Texture tileset;
-    private TextureRegion[][] tiles;
+    private int tileSize = 50;
+    private float scrollSpeed = 50f; // Speed of scrolling in pixels per second
+    private float offset = 0f; // Horizontal offset for scrolling
 
     @Override
     public void create() {
@@ -187,6 +184,11 @@ public class Main extends Game {
         building = new Building(2, 4);
         building.setRecreationalBuilding();
         buildingPresets.add(building);
+
+        // buildings stuff
+        selectedBuildingIndex = -1;
+        buildingMenuOpen = true;
+        showCanPlaceBuilding = false;
 
         // actual rendering
         render = new Render();
@@ -319,8 +321,7 @@ public class Main extends Game {
                         }
 
                     }
-                }
-                else{
+                } else {
                     if (buildingMenuOpen) {
                         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                             if (mouseY <= 150) {
@@ -331,7 +332,6 @@ public class Main extends Game {
                         }
                     }
                 }
-
 
                 break;
             case GAMEOVER:
