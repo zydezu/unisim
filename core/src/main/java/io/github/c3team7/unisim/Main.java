@@ -92,7 +92,7 @@ public class Main extends Game {
 
     // building menu
     private Boolean buildingMenuOpen = true;
-    private boolean showCanPlaceBuilding = false;
+    private boolean showCantPlaceBuilding = false;
     int accomodationcount = 0;
     int cafeteriacount = 0;
     int coursecount = 0;
@@ -195,7 +195,7 @@ public class Main extends Game {
         // buildings stuff
         selectedBuildingIndex = -1;
         buildingMenuOpen = true;
-        showCanPlaceBuilding = false;
+        showCantPlaceBuilding = false;
 
         // actual rendering
         render = new Render();
@@ -321,12 +321,12 @@ public class Main extends Game {
                             buildingMenuOpen = true;
                             selectedBuildingIndex = -1;
                         } else {
-                            showCanPlaceBuilding = true;
+                            showCantPlaceBuilding = true;
                             Timer timer = new Timer();
                             timer.scheduleTask(new Timer.Task() {
                                 @Override
                                 public void run() {
-                                    showCanPlaceBuilding = false;
+                                    showCantPlaceBuilding = false;
                                 }
                             }, 1f);
                         }
@@ -887,7 +887,10 @@ public class Main extends Game {
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
         drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
 
-        if (showCanPlaceBuilding) {
+        if (selectedBuildingIndex != -1) {
+            drawCenteredText(smallerFont, batch, buildingPresetNames[selectedBuildingIndex], mouseX, mouseY - 30);
+        }
+        if (showCantPlaceBuilding) {
             smallFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
         }
 
