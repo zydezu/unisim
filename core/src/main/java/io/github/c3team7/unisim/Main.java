@@ -677,7 +677,7 @@ public class Main extends Game {
     private void renderGameText() {
         renderTime();
 
-        int accomodationcount, cafeteriacount, coursecount, recreationalcount = 0;
+        int accomodationcount = 0, cafeteriacount = 0, coursecount = 0, recreationalcount = 0;
 
         for (Building building : buildings) {
             if (building.isAccomodationBuilding())
