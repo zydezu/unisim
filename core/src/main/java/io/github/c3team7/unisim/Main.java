@@ -192,6 +192,12 @@ public class Main extends Game {
         // store all sprites entities
         createTitleAssets();
 
+        // create tick and cross to be used in game
+        render.addSprite(new Graphic(render, -50, -50, 0f, 1f, 101,
+                "graphics/mouse/tick.png"));
+        render.addSprite(new Graphic(render, -50, -50, 0f, 1f, 102,
+                "graphics/mouse/cross.png"));
+
         // get rects for each menu option to select with mouse
         optionRects.clear();
         GlyphLayout layout = new GlyphLayout();
@@ -507,11 +513,6 @@ public class Main extends Game {
 
         batch.begin();
 
-        // draw sprites first
-        for (Sprite sprite : new ArrayList<>(render.getEntities())) {
-            sprite.draw(batch, Gdx.graphics.getDeltaTime());
-        }
-
         // text must be rendered as part of the batch
         switch (gameState) {
             case TITLE:
@@ -531,8 +532,14 @@ public class Main extends Game {
                 if (buildingMenuOpen) {
                     renderBuildingSelectionText();
                 } else {
-                    
+
                 }
+
+                if (!buildingMenuOpen) {
+                    render.getSpriteByID(101).setPos(mouseX - 15, mouseY - 25);
+                    render.getSpriteByID(102).setPos(mouseX + 12, mouseY - 25);
+                }
+
                 break;
             case PAUSED:
                 renderPauseScreen();
@@ -548,6 +555,11 @@ public class Main extends Game {
                 break;
         }
         renderDebugText();
+
+        // draw sprites first
+        for (Sprite sprite : new ArrayList<>(render.getEntities())) {
+            sprite.draw(batch, Gdx.graphics.getDeltaTime());
+        }
 
         batch.end();
     }
@@ -811,7 +823,6 @@ public class Main extends Game {
 
         smallFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
 
-    
         smallFont.draw(batch, "current selected building: " + selectedBuildingIndex, 0, 450);
     }
 
