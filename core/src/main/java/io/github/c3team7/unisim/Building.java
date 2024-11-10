@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class Building extends Sprite {
     
-    public static final String ASSET = "centralhall.jpg";
+    public static final String ASSET = "defaultgraphic.jpg";
 
     public Building(Render render, float x, float y, float angle, int ID) {
         super(render, ID);
