@@ -82,10 +82,10 @@ public class Main extends Game {
     private List<Building> buildings;
     private List<Building> buildingPresets;
     private String[] buildingPresetNames = { // should probably be moved to a .txt file
-            "Accomodation\nBuilding #1",
-            "Cafeteria\nBuilding #2",
-            "Course\nBuilding #3",
-            "Recreational\nBuilding #3",
+            "Accomodation\nBuilding",
+            "Cafeteria\nBuilding",
+            "Course\nBuilding",
+            "Recreational\nBuilding",
     };
     // ArrayList<String> buildingPresetNames = new ArrayList<>();
     private int selectedBuildingIndex = -1;
@@ -211,13 +211,13 @@ public class Main extends Game {
 
         // create building icons
         new Graphic(render, -1000, -1000, 0f, 1f, 110,
-                "graphics/buildings/test.jpg");
+                "graphics/buildings/1.png");
         new Graphic(render, -1000, -1000, 0f, 1f, 111,
-                "graphics/buildings/test.jpg");
+                "graphics/buildings/2.png");
         new Graphic(render, -1000, -1000, 0f, 1f, 112,
-                "graphics/buildings/test.jpg");
+                "graphics/buildings/3.png");
         new Graphic(render, -1000, -1000, 0f, 1f, 113,
-                "graphics/buildings/test.jpg");
+                "graphics/buildings/4.png");
 
         // get rects for each menu option to select with mouse
         optionRects.clear();
@@ -650,18 +650,26 @@ public class Main extends Game {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
+        Building building = buildingPresets.get(selectedBuildingIndex);
+
         shapeRenderer.setColor(0, 0, 0, 0.6f);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.rect(0, 0, 1280, 150);
-
-        Building building = buildingPresets.get(selectedBuildingIndex);
         shapeRenderer.rect(
-                (int)(mouseX / map.TILE_SIZE) * map.TILE_SIZE,
-                (int)(mouseY / map.TILE_SIZE) * map.TILE_SIZE,
+                (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
+                (int) (mouseY / map.TILE_SIZE) * map.TILE_SIZE,
                 building.getWidth() * map.TILE_SIZE,
                 building.getHeight() * map.TILE_SIZE);
-
         shapeRenderer.end();
+
+        shapeRenderer.setColor(1, 1, 1, 1);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.rect(
+                (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
+                (int) (mouseY / map.TILE_SIZE) * map.TILE_SIZE,
+                building.getWidth() * map.TILE_SIZE,
+                building.getHeight() * map.TILE_SIZE);
+        shapeRenderer.end();
+
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
@@ -673,15 +681,13 @@ public class Main extends Game {
         shapeRenderer.setColor(0, 0, 0, 0.6f);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.rect(0, 0, 1280, 150);
-
         shapeRenderer.end();
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(1, 1, 1, 1);
-
         for (int i = 0; i < buildingPresetNames.length; i++) {
             shapeRenderer.rect((i * 150), 0, 150, 150);
         }
-
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
