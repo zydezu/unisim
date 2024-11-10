@@ -879,10 +879,10 @@ public class Main extends Game {
 
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
         drawRightAlignedText(smallFont, batch, "Buildings placed", 1270, 600);
-        drawRightAlignedText(smallFont, batch, accomodationcount + " accommodation", 1270, 580);
-        drawRightAlignedText(smallFont, batch, cafeteriacount + " cafeteria", 1270, 560);
-        drawRightAlignedText(smallFont, batch, coursecount + " course", 1270, 540);
-        drawRightAlignedText(smallFont, batch, recreationalcount + " recreational", 1270, 520);
+        drawRightAlignedText(smallerFont, batch, accomodationcount + " accommodation", 1270, 580);
+        drawRightAlignedText(smallerFont, batch, cafeteriacount + " cafeteria", 1270, 560);
+        drawRightAlignedText(smallerFont, batch, coursecount + " course", 1270, 540);
+        drawRightAlignedText(smallerFont, batch, recreationalcount + " recreational", 1270, 520);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
         drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
