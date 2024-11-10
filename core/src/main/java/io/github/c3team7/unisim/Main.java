@@ -117,7 +117,7 @@ public class Main extends Game {
 
         // setup tiles
         tileset = new Texture(Gdx.files.internal("graphics/tiles/tileset.png"));
-        tiles = TextureRegion.split(tileset, 10, 10);
+        tiles = TextureRegion.split(tileset, 20, 20);
 
         // setup fonts
         normalFont = createFont("fonts/Montserrat-Regular.ttf", 20, Color.WHITE, 1, Color.BLACK);
@@ -380,8 +380,7 @@ public class Main extends Game {
                 drawTransBoxes();
                 break;
             case GAMEPLAY:
-                drawMap();
-                drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
+                // drawMap();
                 break;
             case PAUSED:
                 drawMap();
@@ -408,6 +407,9 @@ public class Main extends Game {
             case GAMEPLAY:
                 drawMapTiles();
                 renderGameText();
+                batch.end();
+                drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
+                batch.begin();
                 break;
             case PAUSED:
                 renderPauseScreen();
@@ -490,9 +492,20 @@ public class Main extends Game {
         for (int y = 0; y < map.HEIGHT; y++) {
             for (int x = 0; x < map.WIDTH; x++) {
                 // (int) (Math.random() * 2)
-                batch.draw(tiles[0][0], x * map.TILE_SIZE, y * map.TILE_SIZE, tileSize, tileSize);
+                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                // batch.draw(tiles[0][(int) (Math.random() * 5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
+    }
+
+    private TextureRegion getTileFromUID(int uid) {
+        return switch (uid) {
+            case 0 -> tiles[0][4]; // unknown texture
+            case 1 -> tiles[0][0]; // grass
+            case 2 -> tiles[0][1]; // water
+            case 3 -> tiles[0][2]; // building
+            default -> tiles[0][3]; // ? texture
+        };
     }
 
     private void drawMap() {
@@ -501,17 +514,6 @@ public class Main extends Game {
             for (int x = 0; x < map.WIDTH; x = x + 1) {
                 shapeRenderer.setColor(getColourFromUID(map.getFromTileCoords(x, y)));
                 shapeRenderer.rect(x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
-
-                // if (map.getFromTileCoords(x, y) == 1) {
-                // new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f,
-                // render.setOfIDs.size() + 1, "graphics/tiles/grass.png");
-                // } else if (map.getFromTileCoords(x, y) == 2) {
-                // new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f,
-                // render.setOfIDs.size() + 1, "graphics/tiles/water.png");
-                // } else if (map.getFromTileCoords(x, y) == 3) {
-
-                // }
-
             }
         }
         shapeRenderer.end();

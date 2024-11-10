@@ -33,12 +33,14 @@ public class Map {
 
             for (char c : fileContent.toCharArray()) {
                 if (c == '\n') {
-                    continue; // Skip newlines
+                    continue; // skip newlines
+                }
+                if (index >= map.length) {
+                    break; // failsafe
                 }
                 map[index] = c - '0'; // convert char to int
                 index++;
             }
-
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -78,15 +80,25 @@ public class Map {
      * @param width  The width of the building in tiles
      * @param height The height of the building in tiles
      * @return true if the building was successfully placed
+     * @return false if the building cannot be placed
      */
     public boolean placeBuilding(int index, int width, int height) {
+        int startRow = index / WIDTH;
+        int startCol = index % WIDTH;
+    
+        if (startCol + width > WIDTH || startRow + height > HEIGHT) {
+            System.err.println("WARNING! Tried to place a building but it would go out of bounds!");
+            return false; // building will go out of bounds
+        }
+    
+        // place building
         for (int rowStart = index, row = 0; row < height; row++, rowStart += WIDTH) {
             for (int column = 0; column < width; column++) {
                 map[rowStart + column] = 3;
             }
         }
         return true;
-    }
+    }    
 
     private void exportMap() {
         try {
