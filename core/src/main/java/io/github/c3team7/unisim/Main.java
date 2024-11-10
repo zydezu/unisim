@@ -493,7 +493,8 @@ public class Main extends Game {
             for (int x = 0; x < map.WIDTH; x++) {
                 // (int) (Math.random() * 2)
                 // batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed + x*x + y*y) + 1) * 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed + x*x + y*y) + 1) * 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
