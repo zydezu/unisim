@@ -3,6 +3,7 @@ package io.github.c3team7.unisim;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.c3team7.unisim.Map.Map;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;

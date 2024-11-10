@@ -1,4 +1,4 @@
-package io.github.c3team7.unisim;
+package io.github.c3team7.unisim.Map;
 
 import java.util.Arrays;
 
