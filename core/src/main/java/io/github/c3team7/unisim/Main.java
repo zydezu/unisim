@@ -583,6 +583,9 @@ public class Main extends Game {
                     drawBuildingTransBox();
                 } else {
                     // draw button to open ?
+                    if (selectedBuildingIndex != -1) {
+                        drawPlacerBox();
+                    }
                 }
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 batch.begin();
@@ -642,6 +645,26 @@ public class Main extends Game {
         hideSpritesByID(new int[] { 101, 102, 110, 111, 112, 113 });
     }
 
+    private void drawPlacerBox() {
+        // needed for transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        shapeRenderer.setColor(0, 0, 0, 0.6f);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.rect(0, 0, 1280, 150);
+
+        Building building = buildingPresets.get(selectedBuildingIndex);
+        shapeRenderer.rect(
+                (int)(mouseX / map.TILE_SIZE) * map.TILE_SIZE,
+                (int)(mouseY / map.TILE_SIZE) * map.TILE_SIZE,
+                building.getWidth() * map.TILE_SIZE,
+                building.getHeight() * map.TILE_SIZE);
+
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
     private void drawBuildingTransBox() {
         // needed for transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -661,7 +684,6 @@ public class Main extends Game {
 
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
-
     }
 
     private void drawTransMenuBoxes() {
