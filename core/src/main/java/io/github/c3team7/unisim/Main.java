@@ -193,10 +193,10 @@ public class Main extends Game {
         createTitleAssets();
 
         // create tick and cross to be used in game
-        render.addSprite(new Graphic(render, -50, -50, 0f, 1f, 101,
-                "graphics/mouse/tick.png"));
-        render.addSprite(new Graphic(render, -50, -50, 0f, 1f, 102,
-                "graphics/mouse/cross.png"));
+        new Graphic(render, -50, -50, 0f, 1f, 101,
+                "graphics/mouse/tick.png");
+        new Graphic(render, -50, -50, 0f, 1f, 102,
+                "graphics/mouse/cross.png");
 
         // get rects for each menu option to select with mouse
         optionRects.clear();
