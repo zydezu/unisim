@@ -1,6 +1,7 @@
 package io.github.c3team7.unisim;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.github.c3team7.unisim.Map.Map;
@@ -177,19 +178,19 @@ public class Main extends Game {
         buildingPresets = new ArrayList<>();
 
         // add building to presets
-        Building building = new Building(4, 8);
+        Building building = new Building(0, 4, 8);
         building.setAccommodationBuilding();
         buildingPresets.add(building);
 
-        building = new Building(10, 8);
+        building = new Building(1,4, 3);
         building.setCafeteriaBuilding();
         buildingPresets.add(building);
 
-        building = new Building(5, 5);
+        building = new Building(2,2, 3);
         building.setCourseBuilding();
         buildingPresets.add(building);
 
-        building = new Building(2, 4);
+        building = new Building(3, 3, 3);
         building.setRecreationalBuilding();
         buildingPresets.add(building);
 
@@ -528,8 +529,9 @@ public class Main extends Game {
             return false;
         }
 
-        Building newBuilding = new Building(building, index);
+        Building newBuilding = new Building(building, building.getPresetIndex(), index);
         buildings.add(newBuilding);
+
         return true;
     }
 
@@ -781,9 +783,44 @@ public class Main extends Game {
     private void drawMapTiles() {
         for (int y = 0; y < map.HEIGHT; y++) {
             for (int x = 0; x < map.WIDTH; x++) {
-
-                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE,
+                if (map.getFromTileCoords(x, y) != 3){
+                    batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE,
                         TILE_SIZE);
+                    continue;
+                }
+
+                int buildingStartTileX;
+                int buildingStartTileY;
+                int[] buildingStartTileCoords = map.getTileCoordsFromIndex(getBuildingStartIndex(map.getIndexFromTileCoords(x, y)));
+                int buildingPresetIndex = getIndexOfBuildingPreset(map.getIndexFromTileCoords(x, y));
+                buildingStartTileX = buildingStartTileCoords[0];
+                buildingStartTileY = buildingStartTileCoords[1];
+
+                switch (buildingPresetIndex){
+                    case 0:
+                        batch.draw(tiles[1][((x * 9301 + 49297 - y) % 233280) % 2], x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
+                        break;
+
+                    case 1:
+                        batch.draw(tiles[7 - (y - buildingStartTileY)][x - buildingStartTileX], x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
+                        break;
+
+                    case 2:
+                        batch.draw(tiles[4 - (y - buildingStartTileY)][x - buildingStartTileX], x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
+                        break;
+
+                    case 3:
+                        batch.draw(tiles[4 - (y - buildingStartTileY)][2 + (x - buildingStartTileX)], x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
+                        break;
+                    default:
+                        break;
+                }
+
+
+
+
+
+
 
                 // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed * x*x + y*y) + 1) *
                 // 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
@@ -791,6 +828,56 @@ public class Main extends Game {
         }
     }
 
+    private int getIndexOfBuildingPreset(int buildingTileIndex){
+        for (Building building: buildings){
+            int buildingStartTileX;
+            int buildingStartTileY;
+            int[] buildingStartTileCoords = map.getTileCoordsFromIndex(building.getIndex());
+            buildingStartTileX = buildingStartTileCoords[0];
+            buildingStartTileY = buildingStartTileCoords[1];
+
+            System.out.println(Arrays.toString(buildingStartTileCoords));
+
+            int buildingTileX;
+            int buildingTileY;
+            int[] buildingTileCoords = map.getTileCoordsFromIndex(buildingTileIndex);
+            buildingTileX = buildingTileCoords[0];
+            buildingTileY = buildingTileCoords[1];
+
+
+            int xMax = buildingStartTileX + building.getWidth() - 1;
+            int yMax = buildingStartTileY + building.getHeight() - 1;
+
+            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY && buildingTileY <= yMax){
+                return building.getPresetIndex();
+            }
+        }
+        throw new RuntimeException("No Building Found");
+    }
+
+    private int getBuildingStartIndex(int buildingTileIndex){
+        for (Building building: buildings){
+            int buildingStartTileX;
+            int buildingStartTileY;
+            int[] buildingStartTileCoords = map.getTileCoordsFromIndex(building.getIndex());
+            buildingStartTileX = buildingStartTileCoords[0];
+            buildingStartTileY = buildingStartTileCoords[1];
+
+            int buildingTileX;
+            int buildingTileY;
+            int[] buildingTileCoords = map.getTileCoordsFromIndex(buildingTileIndex);
+            buildingTileX = buildingTileCoords[0];
+            buildingTileY = buildingTileCoords[1];
+
+            int xMax = buildingStartTileX + building.getWidth() - 1;
+            int yMax = buildingStartTileY + building.getHeight() - 1;
+
+            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY && buildingTileY <= yMax){
+                return building.getIndex();
+            }
+        }
+        throw new RuntimeException("No Building Found");
+    }
     private TextureRegion getTileFromUID(int UID) {
         return switch (UID) {
             case 0 -> tiles[0][4]; // unknown texture

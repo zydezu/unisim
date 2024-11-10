@@ -8,6 +8,7 @@ import io.github.c3team7.unisim.Render;
 import io.github.c3team7.unisim.Sprite;
 
 public class Building {
+    private int presetIndex;
     private int index;
     private int width;
     private int height;
@@ -17,23 +18,25 @@ public class Building {
     private CourseBuilding courseBuilding;
     private RecreationalBuilding recreationalBuilding;
 
-    public Building(int width, int height) {
+    public Building(int presetIndex, int width, int height) {
+        this.presetIndex = presetIndex;
         this.index = -1;
         this.width = width;
         this.height = height;
     }
 
-    public Building(int index, int width, int height) {
+    public Building(int presetIndex, int index, int width, int height) {
+        this.presetIndex = presetIndex;
         this.index = index;
         this.width = width;
         this.height = height;
     }
 
-    public Building(Building building, int index){
+    public Building(Building building, int presetIndex, int index){
         if (building.exists()){
             throw new IllegalArgumentException("Building index should be -1");
         }
-
+        this.presetIndex = presetIndex;
         this.index = index;
         this.width = building.getWidth();
         this.height = building.getHeight();
@@ -91,6 +94,13 @@ public class Building {
         recreationalBuilding = new RecreationalBuilding();
     }
 
+
+    public int getPresetIndex(){
+        return presetIndex;
+    }
+    public int getIndex(){
+        return index;
+    }
     public int getWidth() {
         return width;
     }
