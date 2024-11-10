@@ -45,7 +45,7 @@ public class Main extends Game {
     // fonts
     FreeTypeFontGenerator generator;
     FreeTypeFontParameter parameter;
-    private BitmapFont normalFont, smallTextFont, mediumFont, boldFont, extraBoldFont;
+    private BitmapFont normalFont, smallerFont, smallFont, mediumFont, boldFont, extraBoldFont;
 
     private final int RESOLUTIONX = 1280;
     private final int RESOLUTIONY = 720;
@@ -107,6 +107,18 @@ public class Main extends Game {
     // buildings
     private List<Building> buildings;
     private List<Building> buildingPresets;
+    String[] buildingPresetNames = { // should probably be moved to a .txt file
+            "Accomodation\nBuilding #1",
+            "Cafeteria\nBuilding #2",
+            "Course\nBuilding #3",
+            "Recreational\nBuilding #3",
+    };
+    private int selectedBuildingIndex = -1;
+
+    // building menu
+    private Boolean buildingMenuOpen = true;
+
+    // ArrayList<String> buildingPresetNames = new ArrayList<>();
 
     // tile scrolling effect
     int tileSize = 50;
@@ -133,7 +145,9 @@ public class Main extends Game {
 
         // setup fonts
         normalFont = createFont("fonts/Montserrat-Regular.ttf", 20, Color.WHITE, 1, Color.BLACK);
-        smallTextFont = createFont("fonts/Montserrat-Medium.ttf", 18, Color.WHITE, 1, Color.BLACK);
+
+        smallerFont = createFont("fonts/Montserrat-Regular.ttf", 15, Color.WHITE, 1, Color.BLACK);
+        smallFont = createFont("fonts/Montserrat-Medium.ttf", 18, Color.WHITE, 1, Color.BLACK);
         mediumFont = createFont("fonts/Montserrat-Medium.ttf", 32, Color.WHITE, 1, Color.BLACK);
         boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK);
         extraBoldFont = createFont("fonts/Montserrat-Black.ttf", 48, Color.WHITE, 1, Color.BLACK);
@@ -158,7 +172,18 @@ public class Main extends Game {
         // add building to presets
         Building building = new Building(4, 8);
         building.setAccommodationBuilding();
+        buildingPresets.add(building);
 
+        building = new Building(10, 8);
+        building.setCafeteriaBuilding();
+        buildingPresets.add(building);
+
+        building = new Building(5, 5);
+        building.setCourseBuilding();
+        buildingPresets.add(building);
+
+        building = new Building(2, 4);
+        building.setRecreationalBuilding();
         buildingPresets.add(building);
 
         // actual rendering
@@ -226,8 +251,6 @@ public class Main extends Game {
 
         // Fullscreen Toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
-            map.placeBuilding(map.getIndexFromTileCoords(3, 4), 20, 30);
-
             toggleFullscreen();
         }
 
@@ -246,6 +269,16 @@ public class Main extends Game {
             case GAMEPLAY:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     pauseGame();
+                }
+
+                if (buildingMenuOpen) {
+                    if (Gdx.input.justTouched()) {
+                        if (mouseY <= 150) {
+                            if (mouseX < buildingPresets.size() * 150) {
+                                selectedBuildingIndex = (int) Math.floor(mouseX / 150);
+                            }
+                        }
+                    }
                 }
 
                 for (int i = Input.Keys.NUM_0; i <= Input.Keys.NUM_9; i++) {
@@ -420,12 +453,13 @@ public class Main extends Game {
             } else {
                 timeRemainingReadable = convertTimeToReadable(timeRemaining);
             }
+            buildingMenuOpen = (selectedBuildingIndex == -1); // hide menu to place building
         }
     }
 
-    private boolean placeBuilding(Building building, int x, int y){
+    private boolean placeBuilding(Building building, int x, int y) {
         int index = map.getIndexFromTileCoords(x, y);
-        if (!map.placeBuilding(index, building.getWidth(), building.getHeight())){
+        if (!map.placeBuilding(index, building.getWidth(), building.getHeight())) {
             return false;
         }
 
@@ -454,7 +488,7 @@ public class Main extends Game {
         switch (gameState) {
             case TITLE:
                 drawCheckerPattern();
-                drawTransBoxes();
+                drawTransMenuBoxes();
                 break;
             case GAMEPLAY:
                 // drawMap();
@@ -462,7 +496,7 @@ public class Main extends Game {
             case PAUSED:
                 drawMap();
                 drawCheckerPattern();
-                drawTransBoxes();
+                drawTransMenuBoxes();
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 break;
             case GAMEOVER:
@@ -485,10 +519,20 @@ public class Main extends Game {
                 break;
             case GAMEPLAY:
                 drawMapTiles();
-                renderGameText();
                 batch.end();
+                if (buildingMenuOpen) {
+                    drawBuildingTransBox();
+                } else {
+                    // draw button to open ?
+                }
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 batch.begin();
+                renderGameText();
+                if (buildingMenuOpen) {
+                    renderBuildingSelectionText();
+                } else {
+                    
+                }
                 break;
             case PAUSED:
                 renderPauseScreen();
@@ -496,7 +540,7 @@ public class Main extends Game {
             case GAMEOVER:
                 drawMapTiles();
                 batch.end();
-                drawTransBoxes();
+                drawTransMenuBoxes();
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 batch.begin();
                 renderGameOverText();
@@ -508,7 +552,29 @@ public class Main extends Game {
         batch.end();
     }
 
-    private void drawTransBoxes() {
+    private void drawBuildingTransBox() {
+        // needed for transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        shapeRenderer.setColor(0, 0, 0, 0.6f);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.rect(0, 0, 1280, 150);
+
+        shapeRenderer.end();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(1, 1, 1, 1);
+
+        for (int i = 0; i < buildingPresetNames.length; i++) {
+            shapeRenderer.rect((i * 150), 0, 150, 150);
+        }
+
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+    }
+
+    private void drawTransMenuBoxes() {
         // needed for transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -694,21 +760,29 @@ public class Main extends Game {
         }
 
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
-        drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 600);
-        drawRightAlignedText(smallTextFont, batch, accomodationcount + " accommodation", 1270, 580);
-        drawRightAlignedText(smallTextFont, batch, cafeteriacount + " cafeteria", 1270, 560);
-        drawRightAlignedText(smallTextFont, batch, coursecount + " course", 1270, 540);
-        drawRightAlignedText(smallTextFont, batch, recreationalcount + " recreational", 1270, 520);
+        drawRightAlignedText(smallFont, batch, "Buildings placed", 1270, 600);
+        drawRightAlignedText(smallFont, batch, accomodationcount + " accommodation", 1270, 580);
+        drawRightAlignedText(smallFont, batch, cafeteriacount + " cafeteria", 1270, 560);
+        drawRightAlignedText(smallFont, batch, coursecount + " course", 1270, 540);
+        drawRightAlignedText(smallFont, batch, recreationalcount + " recreational", 1270, 520);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
-        drawRightAlignedText(smallTextFont, batch, "Satisfaction rating", 1270, 450);
+        drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
 
-        smallTextFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
+        smallFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
+    }
+
+    private void renderBuildingSelectionText() {
+        String menuText = "";
+        for (int i = 0; i < buildingPresetNames.length; i++) {
+            menuText = buildingPresetNames[i];
+            drawCenteredText(smallerFont, batch, menuText, (i * 150) + 75, 40);
+        }
     }
 
     private void renderTime() {
         drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
-        drawRightAlignedText(smallTextFont, batch, "Time remaining", 1270, 670);
+        drawRightAlignedText(smallFont, batch, "Time remaining", 1270, 670);
     }
 
     private void renderGameOverText() {
@@ -721,21 +795,24 @@ public class Main extends Game {
         drawCenteredText(extraBoldFont, batch, "Game over!", 640, 450);
 
         drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
-        drawRightAlignedText(smallTextFont, batch, "Time's up!", 1270, 670);
+        drawRightAlignedText(smallFont, batch, "Time's up!", 1270, 670);
     }
 
     private void renderDebugText() {
-        smallTextFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
-        smallTextFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
-        smallTextFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
+        smallFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
+        smallFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
+        smallFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
         // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
-        smallTextFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
-        smallTextFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
+        smallFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
+        smallFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
 
-        smallTextFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
+        smallFont.draw(batch, "current spriteIDs list: " + render.setOfIDs.toString(), 0, 500);
 
-        smallTextFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
+        smallFont.draw(batch, "current res: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), 0, 480);
+
+    
+        smallFont.draw(batch, "current selected building: " + selectedBuildingIndex, 0, 450);
     }
 
     public void drawCenteredText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
