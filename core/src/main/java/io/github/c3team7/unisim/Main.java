@@ -480,6 +480,14 @@ public class Main extends Game {
             for (int x = 0; x < map.WIDTH; x = x + 1) {
                 shapeRenderer.setColor(getColourFromUID(map.getFromTileCoords(x, y)));
                 shapeRenderer.rect(x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
+
+            //     if (map.getFromTileCoords(x, y) == 1) {
+            //         new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f, render.setOfIDs.size() + 1, "graphics/tiles/grass.png");
+            //     } else if (map.getFromTileCoords(x, y) == 2) {
+            //         new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f, render.setOfIDs.size() + 1, "graphics/tiles/water.png");
+            //     } else if (map.getFromTileCoords(x, y) == 3) {
+
+            //     }
             }
         }
         shapeRenderer.end();
