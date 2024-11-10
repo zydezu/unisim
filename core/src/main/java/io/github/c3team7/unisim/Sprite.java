@@ -44,8 +44,8 @@ public abstract class Sprite {
     }
 
     protected void moveOffScreen() {
-        rectangle.x = -1000;
-        rectangle.y = -1000;
+        rectangle.x = -10000;
+        rectangle.y = -10000;
     }
 
     public float getWidth() {
