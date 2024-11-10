@@ -652,7 +652,7 @@ public class Main extends Game {
 
         Building building = buildingPresets.get(selectedBuildingIndex);
 
-        shapeRenderer.setColor(0, 0, 0, 0.6f);
+        shapeRenderer.setColor(0, 0, 0, 0.6f); // draw filled
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.rect(
                 (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
@@ -661,7 +661,7 @@ public class Main extends Game {
                 building.getHeight() * map.TILE_SIZE);
         shapeRenderer.end();
 
-        shapeRenderer.setColor(1, 1, 1, 1);
+        shapeRenderer.setColor(1, 1, 1, 1); // draw outline
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.rect(
                 (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
