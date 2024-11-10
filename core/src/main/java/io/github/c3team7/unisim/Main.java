@@ -10,10 +10,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
@@ -43,6 +45,7 @@ public class Main extends Game {
 
     private final int RESOLUTIONX = 1280;
     private final int RESOLUTIONY = 720;
+    private final int TILE_SIZE = 20;
 
     // game state
     enum State {
@@ -98,6 +101,9 @@ public class Main extends Game {
     float scrollSpeed = 50f; // Speed of scrolling in pixels per second
     float offset = 0f; // Horizontal offset for scrolling
 
+    private Texture tileset;
+    private TextureRegion[][] tiles;
+
     @Override
     public void create() {
         // setting up camera
@@ -109,6 +115,11 @@ public class Main extends Game {
         batch = new SpriteBatch();
         batch.enableBlending();
 
+        // setup tiles
+        tileset = new Texture(Gdx.files.internal("graphics/tiles/tileset.png"));
+        tiles = TextureRegion.split(tileset, 10, 10);
+
+        // setup fonts
         normalFont = createFont("fonts/Montserrat-Regular.ttf", 20, Color.WHITE, 1, Color.BLACK);
         smallTextFont = createFont("fonts/Montserrat-Medium.ttf", 18, Color.WHITE, 1, Color.BLACK);
         mediumFont = createFont("fonts/Montserrat-Medium.ttf", 32, Color.WHITE, 1, Color.BLACK);
@@ -262,7 +273,7 @@ public class Main extends Game {
     }
 
     private void selectMenuOption(int menuSelection) {
-        if (gameState == gameState.TITLE) {
+        if (gameState == State.TITLE) {
             switch (menuSelection) {
                 case 0:
                     startGame();
@@ -278,7 +289,7 @@ public class Main extends Game {
                 default:
                     break;
             }
-        } else if (gameState == gameState.PAUSED) {
+        } else if (gameState == State.PAUSED) {
             switch (menuSelection) {
                 case 0:
                     unpauseGame();
@@ -395,6 +406,7 @@ public class Main extends Game {
                 renderTitle();
                 break;
             case GAMEPLAY:
+                drawMapTiles();
                 renderGameText();
                 break;
             case PAUSED:
@@ -474,6 +486,15 @@ public class Main extends Game {
         shapeRenderer.end();
     }
 
+    private void drawMapTiles() {
+        for (int y = 0; y < map.HEIGHT; y++) {
+            for (int x = 0; x < map.WIDTH; x++) {
+                // (int) (Math.random() * 2)
+                batch.draw(tiles[0][0], x * map.TILE_SIZE, y * map.TILE_SIZE, tileSize, tileSize);
+            }
+        }
+    }
+
     private void drawMap() {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int y = 0; y < map.HEIGHT; y = y + 1) {
@@ -481,13 +502,16 @@ public class Main extends Game {
                 shapeRenderer.setColor(getColourFromUID(map.getFromTileCoords(x, y)));
                 shapeRenderer.rect(x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
 
-            //     if (map.getFromTileCoords(x, y) == 1) {
-            //         new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f, render.setOfIDs.size() + 1, "graphics/tiles/grass.png");
-            //     } else if (map.getFromTileCoords(x, y) == 2) {
-            //         new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f, render.setOfIDs.size() + 1, "graphics/tiles/water.png");
-            //     } else if (map.getFromTileCoords(x, y) == 3) {
+                // if (map.getFromTileCoords(x, y) == 1) {
+                // new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f,
+                // render.setOfIDs.size() + 1, "graphics/tiles/grass.png");
+                // } else if (map.getFromTileCoords(x, y) == 2) {
+                // new Graphic(render, x * map.TILE_SIZE, y * map.TILE_SIZE, 0f, 1f,
+                // render.setOfIDs.size() + 1, "graphics/tiles/water.png");
+                // } else if (map.getFromTileCoords(x, y) == 3) {
 
-            //     }
+                // }
+
             }
         }
         shapeRenderer.end();

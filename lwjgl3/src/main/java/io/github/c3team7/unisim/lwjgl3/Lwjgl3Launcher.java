@@ -1,6 +1,5 @@
 package io.github.c3team7.unisim.lwjgl3;
 
-import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import io.github.c3team7.unisim.Main;
