@@ -1,4 +1,4 @@
-package io.github.c3team7.unisim;
+package io.github.c3team7.unisim.Map;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -85,9 +85,17 @@ public class Map {
      * @return true if the building was successfully placed
      */
     public boolean placeBuilding(int index, int width, int height) {
+        int[] oldMap = map.clone();
         for (int rowStart = index, row = 0; row < height; row++, rowStart += WIDTH) {
             for (int column = 0; column < width; column++) {
-                map[rowStart + column] = 3;
+                int buildingIndex = rowStart + column;
+
+                if (buildingIndex < 0 || buildingIndex >= map.length){
+                    map = oldMap;
+                    return false;
+                }
+
+                map[buildingIndex] = 3;
             }
         }
         return true;
