@@ -103,6 +103,7 @@ public class Main extends Game {
 
     private Texture tileset;
     private TextureRegion[][] tiles;
+    private TextureRegion[] tileCache;
 
     @Override
     public void create() {
@@ -118,6 +119,7 @@ public class Main extends Game {
         // setup tiles
         tileset = new Texture(Gdx.files.internal("graphics/tiles/tileset.png"));
         tiles = TextureRegion.split(tileset, 20, 20);
+        initTileCache();
 
         // setup fonts
         normalFont = createFont("fonts/Montserrat-Regular.ttf", 20, Color.WHITE, 1, Color.BLACK);
@@ -493,12 +495,22 @@ public class Main extends Game {
             for (int x = 0; x < map.WIDTH; x++) {
                 // (int) (Math.random() * 2)
                 // batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                batch.draw(tileCache[map.getFromTileCoords(x, y)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed + x*x + y*y) + 1) * 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
 
+    private void initTileCache() {
+        tileCache = new TextureRegion[5];
+        tileCache[0] = tiles[0][3]; // unknown texture
+        tileCache[1] = tiles[0][0]; // grass
+        tileCache[2] = tiles[0][1]; // water
+        tileCache[3] = tiles[0][2]; // building
+        tileCache[4] = tiles[0][4]; // building
+    }
+
+    // TODO: probs cache these
     private TextureRegion getTileFromUID(int UID) {
         return switch (UID) {
             case 0 -> tiles[0][4]; // unknown texture
