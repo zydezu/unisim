@@ -497,11 +497,11 @@ public class Main extends Game {
                 break;
             case GAMEOVER:
                 drawMapTiles();
-                renderGameOverText();
                 batch.end();
                 drawTransBoxes();
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 batch.begin();
+                renderGameOverText();
             default:
                 break;
         }
@@ -579,8 +579,10 @@ public class Main extends Game {
     private void drawMapTiles() {
         for (int y = 0; y < map.HEIGHT; y++) {
             for (int x = 0; x < map.WIDTH; x++) {
+
                 batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE,
                         TILE_SIZE);
+
                 // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed * x*x + y*y) + 1) *
                 // 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
@@ -677,7 +679,10 @@ public class Main extends Game {
     private void renderGameText() {
         renderTime();
 
-        int accomodationcount = 0, cafeteriacount = 0, coursecount = 0, recreationalcount = 0;
+        int accomodationcount = 0;
+        int cafeteriacount = 0;
+        int coursecount = 0;
+        int recreationalcount = 0;
 
         for (Building building : buildings) {
             if (building.isAccomodationBuilding())
@@ -690,28 +695,15 @@ public class Main extends Game {
                 recreationalcount++;
         }
 
-        // smallTextFont.draw(batch, "NUMBER OF ACCOMMODATION BUILDINGS PLACED: " +
-        // numberOfAccomodationBuildings,
-        // 0, 680);
-        // smallTextFont.draw(batch, "NUMBER OF CAFETERIA BUILDINGS PLACED: " +
-        // numberOfCafeteriaBuildings,
-        // 0, 660);
-        // smallTextFont.draw(batch, "NUMBER OF COURSE BUILDINGS PLACED: " +
-        // numberOfCourseBuildings,
-        // 0, 640);
-        // smallTextFont.draw(batch, "NUMBER OF RECREATIONAL BUILDINGS PLACED: " +
-        // numberOfRecreationalBuildings,
-        // 0, 620);
-
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
-        drawRightAlignedText(smallTextFont, batch, accomodationcount + " accommodation", 1270, 600);
-        drawRightAlignedText(smallTextFont, batch, cafeteriacount + " cafeteria", 1270, 580);
-        drawRightAlignedText(smallTextFont, batch, coursecount + " course", 1270, 560);
-        drawRightAlignedText(smallTextFont, batch, recreationalcount + " recreational", 1270, 540);
-        drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 520);
+        drawRightAlignedText(smallTextFont, batch, "Buildings placed", 1270, 600);
+        drawRightAlignedText(smallTextFont, batch, accomodationcount + " accommodation", 1270, 580);
+        drawRightAlignedText(smallTextFont, batch, cafeteriacount + " cafeteria", 1270, 560);
+        drawRightAlignedText(smallTextFont, batch, coursecount + " course", 1270, 540);
+        drawRightAlignedText(smallTextFont, batch, recreationalcount + " recreational", 1270, 520);
 
-        drawRightAlignedText(boldFont, batch, "50%", 1270, 560);
-        drawRightAlignedText(smallTextFont, batch, "Satisfaction rating", 1270, 530);
+        drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
+        drawRightAlignedText(smallTextFont, batch, "Satisfaction rating", 1270, 450);
 
         smallTextFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
     }
@@ -728,7 +720,7 @@ public class Main extends Game {
             mediumFont.draw(batch, menuText, menuOptionInitx, (menuOptionInity - i * 40));
         }
 
-        drawCenteredText(extraBoldFont, batch, "GAME OVER!", 640, 360);
+        drawCenteredText(extraBoldFont, batch, "Game over!", 640, 450);
 
         drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
         drawRightAlignedText(smallTextFont, batch, "Time's up!", 1270, 670);
