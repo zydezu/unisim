@@ -292,6 +292,7 @@ public class Main extends Game {
                     buildingMenuOpen = true;
                     selectedBuildingIndex = -1;
                 }
+
                 if (selectedBuildingIndex != -1) {
                     Building building = buildingPresets.get(selectedBuildingIndex);
                     int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
@@ -319,16 +320,19 @@ public class Main extends Game {
 
                     }
                 }
-
-                if (buildingMenuOpen) {
-                    if (Gdx.input.justTouched()) {
-                        if (mouseY <= 150) {
-                            if (mouseX < buildingPresets.size() * 150) {
-                                selectedBuildingIndex = (int) Math.floor(mouseX / 150);
+                else{
+                    if (buildingMenuOpen) {
+                        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                            if (mouseY <= 150) {
+                                if (mouseX < buildingPresets.size() * 150) {
+                                    selectedBuildingIndex = (int) Math.floor(mouseX / 150);
+                                }
                             }
                         }
                     }
                 }
+
+
                 break;
             case GAMEOVER:
                 menuSelectionInputs();
