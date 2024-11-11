@@ -1,10 +1,5 @@
 package io.github.c3team7.unisim;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import io.github.c3team7.unisim.Map.Map;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
@@ -17,19 +12,22 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
 import io.github.c3team7.unisim.Building.Building;
+import io.github.c3team7.unisim.Map.Map;
 
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 // TO DO
 //
@@ -37,118 +35,240 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 // HAI ! ^_^
 // bye
 
-public class Main extends Game {
-    private OrthographicCamera camera;
-    private Viewport viewport;
-    private ShapeRenderer shapeRenderer;
-    private SpriteBatch batch;
+/**
+ * The class for the game that handles inputs, logic and drawing.
+ */
+public class UniSim extends Game {
+    /**
+     * The width of the screen in pixels
+     */
+    private final int RESOLUTION_X = 1280;
 
-    // fonts
-    private FreeTypeFontGenerator generator;
-    private FreeTypeFontParameter parameter;
-    private BitmapFont normalFont, smallerFont, smallFont, mediumFont, boldFont, extraBoldFont;
+    /**
+     * The height of the screen in pixels
+     */
+    private final int RESOLUTION_Y = 720;
 
-    private final int RESOLUTIONX = 1280;
-    private final int RESOLUTIONY = 720;
-    private final int TILE_SIZE = 20;
-
-    // game state
-    enum State {
-        TITLE,
-        GAMEPLAY,
-        PAUSED,
-        GAMEOVER
-    }
-
-    State gameState = State.TITLE;
-
-    // timer
-    int framesElapsed = 0;
-    float globalTimeElapsed = 0;
-    private float timeElapsed = 0;
-    private float timeRemaining = 0;
-    private String timeRemainingReadable = "";
+    /**
+     * The time limit of the game in seconds
+     */
     private final float timeAllowed = 300;
 
-    // mouse position
-    float mouseX = 0;
-    float mouseY = 0;
-
     // map, sprites and tileset
+
+    /**
+     * The class to store and handle the map
+     */
     protected Map map;
     protected Render render;
-    private Texture tileset;
-    private TextureRegion[][] tiles;
 
+    /**
+     * Stores the state of the game
+     */
+    State gameState;
+
+    /**
+     * Stores the x position of the mouse
+     */
+    float mouseX;
+
+    /**
+     * Stores the y position of the mouse
+     */
+    float mouseY;
+
+    /**
+     * Counts the number of accommodation buildings placed
+     */
+    int accommodationBuildingCount;
+
+    /**
+     * Counts the number of cafeteria buildings placed
+     */
+    int cafeteriaBuildingCount;
+
+    /**
+     * Counts the number of course buildings placed
+     */
+    int courseBuildingCount;
+
+    /**
+     * Counts the number of recreational buildings placed
+     */
+    int recreationalBuildingCount;
+
+    /**
+     * The camera for the game
+     */
+    private OrthographicCamera camera;
+
+    /**
+     * The viewport for the game
+     */
+    private Viewport viewport;
+
+    /**
+     * Allows shapes to be drawn to the screen
+     */
+    private ShapeRenderer shapeRenderer;
+
+    /**
+     * Allows textures to be drawn to the screen
+     */
+    private SpriteBatch batch;
+
+    /**
+     * Generates fonts
+     */
+    private FreeTypeFontGenerator generator;
+
+    /**
+     * Allows different font options to be selected
+     */
+    private FreeTypeFontParameter parameter;
+
+    /**
+     * The different font sizes
+     */
+    private BitmapFont normalFont, smallerFont, smallFont, mediumFont, boldFont, extraBoldFont;
+
+    /**
+     * The time elapsed since the start of a new game in seconds
+     */
+    private float timeElapsed;
+
+    /**
+     * A string where the time remaining is stored as (x:xx)
+     */
+    private String timeRemainingReadable;
+
+    /**
+     * Stores the tileset in a 2D array
+     */
+    private TextureRegion[][] tiles;
     // buildings
+
+    /**
+     * List of the buildings placed on the map
+     */
     private List<Building> buildings;
+
+    /**
+     * Presets of buildings that can be placed
+     */
     private List<Building> buildingPresets;
-    private String[] buildingPresetNames = { // should probably be moved to a .txt file
-            "Accomodation\nBuilding",
-            "Cafeteria\nBuilding",
-            "Course\nBuilding",
-            "Recreational\nBuilding",
+
+    /**
+     * The names of the building preset names
+     */
+    private final String[] buildingPresetNames = { // should probably be moved to a .txt file
+        "Accommodation",
+        "Cafeteria",
+        "Course",
+        "Recreational",
     };
-    // ArrayList<String> buildingPresetNames = new ArrayList<>();
+
+    /**
+     * The index of the selected building in building presets
+     */
     private int selectedBuildingIndex = -1;
 
-    // building menu
+    /**
+     * Whether the building menu is open
+     */
     private Boolean buildingMenuOpen = true;
+
+    /**
+     * Whether the "can't place building" text should be drawn
+     */
     private boolean showCantPlaceBuilding = false;
-    int accomodationcount = 0;
-    int cafeteriacount = 0;
-    int coursecount = 0;
-    int recreationalcount = 0;
 
-    // menu options
+    /**
+     * Whether the instructions are currently showing
+     */
     private Boolean currentlyShowingInstructions = false;
-    private String[] menuOptions = { // should probably be moved to a .txt file
-            "Start Game",
-            "Instructions",
-            "Options",
-            "Exit to Desktop"
+
+    /**
+     * A list of the title screen menu options
+     */
+    private final String[] menuOptions = { // should probably be moved to a .txt file
+        "Start Game",
+        "Instructions",
+        "Options",
+        "Exit to Desktop"
     };
-    private String[] menuOptionsExplanations = { // should probably be moved to a .txt file
-            "Start a new simulation!",
-            "View how to play",
-            "Enable fullscreen, etc...",
-            "Close the game"
+
+    /**
+     * A list to show what each option on the title screen does
+     */
+    private final String[] menuOptionsExplanations = { // should probably be moved to a .txt file
+        "Start a new simulation!",
+        "View how to play",
+        "Enable fullscreen, etc...",
+        "Close the game"
     };
-    private String[] pauseOptions = { // should probably be moved to a .txt file
-            "Continue",
-            "Restart",
-            "Quit Game"
+
+    /**
+     * A list of the pause menu options
+     */
+    private final String[] pauseOptions = { // should probably be moved to a .txt file
+        "Continue",
+        "Restart",
+        "Quit Game"
     };
-    private String[] gameOverOptions = { // should probably be moved to a .txt file
-            "Restart",
-            "Quit Game"
+
+    /**
+     * A list of the game over options
+     */
+    private final String[] gameOverOptions = { // should probably be moved to a .txt file
+        "Restart",
+        "Quit Game"
     };
-    private ArrayList<Rectangle> optionRects = new ArrayList<>();
+
+    /**
+     * Stores the rectanges of the menu options for mouse selection
+     */
+    private final ArrayList<Rectangle> optionRects = new ArrayList<>();
+
+    /**
+     * The index of the currently selected menu option
+     */
     private int menuSelection = 0;
+
+    /**
+     * The number of menu options for a given meny
+     */
     private int maxMenuOptions = 4;
-    private int menuOptionInitx = 510;
-    private int menuOptionInity = 225;
 
-    // tile scrolling effect
-    private int tileSize = 50;
-    private float scrollSpeed = 50f; // Speed of scrolling in pixels per second
+    /**
+     * The starting menu x co-ordinate
+     */
+    private final int menuOptionInitx = 510;
+
+    /**
+     * The starting menu y co-ordinate
+     */
+    private final int menuOptionInity = 225;
     private float offset = 0f; // Horizontal offset for scrolling
+    private final boolean showDebugText = false;
 
-    private Boolean showDebugText = false;
 
+    /**
+     * Loads assets and sets up the camera and rendering classes
+     */
     @Override
     public void create() {
-        // setting up camera
+        // setup camera
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, RESOLUTIONX, RESOLUTIONY);
-        viewport = new FitViewport(RESOLUTIONX, RESOLUTIONY, camera);
+        camera.setToOrtho(false, RESOLUTION_X, RESOLUTION_Y);
+        viewport = new FitViewport(RESOLUTION_X, RESOLUTION_Y, camera);
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
         batch.enableBlending();
 
         // setup tiles
-        tileset = new Texture(Gdx.files.internal("graphics/tiles/tileset.png"));
+        Texture tileset = new Texture(Gdx.files.internal("graphics/tiles/tileset.png"));
         tiles = TextureRegion.split(tileset, 20, 20);
 
         // setup fonts
@@ -160,46 +280,17 @@ public class Main extends Game {
         boldFont = createFont("fonts/Montserrat-Bold.ttf", 32, Color.WHITE, 1, Color.BLACK);
         extraBoldFont = createFont("fonts/Montserrat-Black.ttf", 48, Color.WHITE, 1, Color.BLACK);
 
-        initGame();
+        initialiseGame();
     }
 
-    private void initGame() {
+    /**
+     * Initialises the game to start in the title screen
+     */
+    private void initialiseGame() {
         gameState = State.TITLE;
         menuSelection = 0;
         maxMenuOptions = 4;
 
-        timeElapsed = 0;
-
-        // CREATE MAP THEN CREATE ENTITIES FOR MAP
-        map = new Map("map.txt"); // generate the map
-
-        // init lists
-        buildings = new ArrayList<>(10);
-        buildingPresets = new ArrayList<>();
-
-        // add building to presets
-        Building building = new Building(0, 4, 8);
-        building.setAccommodationBuilding();
-        buildingPresets.add(building);
-
-        building = new Building(1,4, 3);
-        building.setCafeteriaBuilding();
-        buildingPresets.add(building);
-
-        building = new Building(2,2, 3);
-        building.setCourseBuilding();
-        buildingPresets.add(building);
-
-        building = new Building(3, 3, 3);
-        building.setRecreationalBuilding();
-        buildingPresets.add(building);
-
-        // buildings stuff
-        selectedBuildingIndex = -1;
-        buildingMenuOpen = true;
-        showCantPlaceBuilding = false;
-
-        // actual rendering
         render = new Render();
 
         // store all sprites entities
@@ -207,19 +298,19 @@ public class Main extends Game {
 
         // create tick and cross to be used in game
         new Graphic(render, -50, -50, 0f, 1f, 101,
-                "graphics/mouse/tick.png");
+            "graphics/mouse/tick.png");
         new Graphic(render, -50, -50, 0f, 1f, 102,
-                "graphics/mouse/cross.png");
+            "graphics/mouse/cross.png");
 
         // create building icons
         new Graphic(render, -1000, -1000, 0f, 1f, 110,
-                "graphics/buildings/1.png");
+            "graphics/buildings/1.png");
         new Graphic(render, -1000, -1000, 0f, 1f, 111,
-                "graphics/buildings/2.png");
+            "graphics/buildings/2.png");
         new Graphic(render, -1000, -1000, 0f, 1f, 112,
-                "graphics/buildings/3.png");
+            "graphics/buildings/3.png");
         new Graphic(render, -1000, -1000, 0f, 1f, 113,
-                "graphics/buildings/4.png");
+            "graphics/buildings/4.png");
 
         // get rects for each menu option to select with mouse
         optionRects.clear();
@@ -229,11 +320,50 @@ public class Main extends Game {
 
             optionRects.add(new Rectangle(menuOptionInitx - 15, (menuOptionInity - 32 - i * 40), 300, 32));
         }
-        // new Building(map, 50, 100, 0, 150, 150, 0);
+    }
+
+    /**
+     * Starts the game and resets counters and the map
+     */
+    private void startGame() {
+        gameState = State.GAMEPLAY;
+        destroySpritesByIDs(new int[]{1}); // remove title sprites
+
+        timeElapsed = 0;
+
+        map = new Map("map.txt"); // generate the map
+        buildings = new ArrayList<>(10);
+        buildingPresets = new ArrayList<>();
+
+        // initialise building presets
+        Building building = new Building(0, 4, 8);
+        building.setAccommodationBuilding();
+        buildingPresets.add(building);
+
+        building = new Building(1, 4, 3);
+        building.setCafeteriaBuilding();
+        buildingPresets.add(building);
+
+        building = new Building(2, 2, 3);
+        building.setCourseBuilding();
+        buildingPresets.add(building);
+
+        building = new Building(3, 3, 3);
+        building.setRecreationalBuilding();
+        buildingPresets.add(building);
+
+        accommodationBuildingCount = 0;
+        cafeteriaBuildingCount = 0;
+        courseBuildingCount = 0;
+        recreationalBuildingCount = 0;
+
+        // buildings menu
+        selectedBuildingIndex = -1;
+        buildingMenuOpen = true;
+        showCantPlaceBuilding = false;
     }
 
     private void setUpFontGenerator(String font) {
-        // Generate font from TTF file
         generator = new FreeTypeFontGenerator(Gdx.files.internal(font));
         parameter = new FreeTypeFontParameter();
     }
@@ -241,13 +371,8 @@ public class Main extends Game {
     private BitmapFont createFont(String font, int fontsize, Color color, int borderwidth, Color bordercolor) {
         setUpFontGenerator(font);
 
-        // Set font size
         parameter.size = fontsize;
-
-        // Set color if needed
         parameter.color = color;
-
-        // Optionally set border or shadow
         parameter.borderWidth = borderwidth;
         parameter.borderColor = bordercolor;
 
@@ -255,8 +380,7 @@ public class Main extends Game {
         parameter.magFilter = TextureFilter.Linear;
 
         BitmapFont generatedFont = generator.generateFont(parameter); // BitmapFont from TTF
-
-        generator.dispose(); // prevent memory leaks
+        generator.dispose();
 
         return generatedFont;
     }
@@ -269,35 +393,34 @@ public class Main extends Game {
         centerSpriteX(new Graphic(render, 0, 500, 0f, 1f, 20, "graphics/unisimlogopixel.png")); // create + center
     }
 
+    /**
+     * Handles inputs according to the game state using
+     * {@code switch} statements
+     */
     private void inputs() {
-        // mouse pos
         mouseX = Gdx.input.getX();
-        mouseY = Gdx.input.getY(); // match sprite and text pos
-        mouseX = mouseX * (RESOLUTIONX / (float) Gdx.graphics.getWidth());
-        mouseY = mouseY * (RESOLUTIONY / (float) Gdx.graphics.getHeight());
-        mouseY = RESOLUTIONY - mouseY;
+        mouseY = Gdx.input.getY();
 
-        // Fullscreen Toggle
+        mouseX = mouseX * (RESOLUTION_X / (float) Gdx.graphics.getWidth());
+        mouseY = mouseY * (RESOLUTION_Y / (float) Gdx.graphics.getHeight());
+        mouseY = RESOLUTION_Y - mouseY; // 0, 0 mouse = top left - 0, 0 screen = bottom left
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
         }
 
-        // TODO: remove debug toggle
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
-            showDebugText = !showDebugText;
-        // Manage player inputs here
         switch (gameState) {
-            case TITLE:
-
-                // title screen menu selection
+            case TITLE, GAMEOVER:
                 menuSelectionInputs();
                 break;
+
             case PAUSED:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     unpauseGame();
                 }
                 menuSelectionInputs();
                 break;
+
             case GAMEPLAY:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                     pauseGame();
@@ -314,15 +437,17 @@ public class Main extends Game {
                     int mouseTileX = mouseTileCoords[0];
                     int mouseTileY = mouseTileCoords[1];
 
+                    // Check if the left mouse button is pressed
                     if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                         boolean canPlaceBuilding = map.canPlaceBuilding(
-                                map.getIndexFromTileCoords(mouseTileX, mouseTileY), building.getWidth(),
-                                building.getHeight());
+                            map.getIndexFromTileCoords(mouseTileX, mouseTileY), building.getWidth(), building.getHeight()
+                        );
                         if (canPlaceBuilding) {
-                            placeBuilding(building, mouseTileCoords[0], mouseTileCoords[1]);
+                            placeBuilding(building, mouseTileX, mouseTileY);
                             buildingMenuOpen = true;
                             selectedBuildingIndex = -1;
-                        } else {
+                        }
+                        else {
                             showCantPlaceBuilding = true;
                             Timer timer = new Timer();
                             timer.scheduleTask(new Timer.Task() {
@@ -332,50 +457,50 @@ public class Main extends Game {
                                 }
                             }, 1f);
                         }
-
                     }
-                } else {
-                    if (buildingMenuOpen) {
-                        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-                            if (mouseY <= 150) {
-                                if (mouseX < buildingPresets.size() * 150) {
-                                    selectedBuildingIndex = (int) Math.floor(mouseX / 150);
-                                }
+                }
+                else {
+                    if (buildingMenuOpen && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                        if (mouseY <= 150) {
+                            int maxX = buildingPresets.size() * 150;
+                            if (mouseX < maxX) {
+                                selectedBuildingIndex = (int) Math.floor(mouseX / 150);  // Select building based on mouse position
                             }
                         }
                     }
                 }
-
                 break;
-            case GAMEOVER:
-                menuSelectionInputs();
             default:
                 break;
         }
     }
 
-    private int[] convertMouseCoordsToTileCoords(float mouseX, float mouseY) {
-        return new int[] { (int) mouseX / map.TILE_SIZE, (int) mouseY / map.TILE_SIZE };
-    }
-
+    /**
+     * Toggles fullscreen
+     */
     private void toggleFullscreen() {
-        Boolean fullScreen = Gdx.graphics.isFullscreen();
+        boolean fullScreen = Gdx.graphics.isFullscreen();
         Monitor currMonitor = Gdx.graphics.getMonitor();
         if (fullScreen) {
             Gdx.graphics.setWindowedMode(1280, 720);
         } else {
             DisplayMode displayMode = Gdx.graphics.getDisplayMode(currMonitor);
-            if (!Gdx.graphics.setFullscreenMode(displayMode)) {
-                // failed
-            }
+            Gdx.graphics.setFullscreenMode(displayMode);
         }
     }
 
+    /**
+     * Changes menu selection according to inputs
+     */
     private void menuSelectionInputs() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W))
+        // Keyboard
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
             menuSelection -= 1;
-        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S))
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S)) {
             menuSelection += 1;
+        }
         menuSelection = (menuSelection + maxMenuOptions) % maxMenuOptions;
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
@@ -387,88 +512,93 @@ public class Main extends Game {
             }
         }
 
-        // mouse
+        // Mouse
         if (!currentlyShowingInstructions) {
             for (int i = 0; i < optionRects.size(); i++) {
-                if (optionRects.get(i).contains(mouseX, mouseY)) {
-                    menuSelection = i;
-                    break;
+                if (!(optionRects.get(i).contains(mouseX, mouseY))) {
+                    continue;
                 }
-            }
-            if (Gdx.input.justTouched()) {
-                for (int i = 0; i < optionRects.size(); i++) {
-                    if (optionRects.get(i).contains(mouseX, mouseY)) {
-                        menuSelection = i;
-                        selectMenuOption(menuSelection);
-                        break;
-                    }
+                menuSelection = i;
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                    selectMenuOption(menuSelection);
                 }
             }
         }
     }
 
+    /**
+     * Selects the menu option by game state
+     * @param menuSelection The index of the selected menu
+     *                      option
+     */
     private void selectMenuOption(int menuSelection) {
-        if (gameState == State.TITLE) {
-            switch (menuSelection) {
-                case 0:
-                    startGame();
-                    break;
-                case 1:
-                    new Graphic(render, 0, 0, 0f, 1f, 300,
+        switch (gameState){
+            case TITLE:
+                switch (menuSelection) {
+                    case 0:
+                        startGame();
+                        break;
+                    case 1:
+                        new Graphic(render, 0, 0, 0f, 1f, 300,
                             "graphics/instructions.jpg");
-                    currentlyShowingInstructions = true;
-                    break;
-                case 2:
-                    toggleFullscreen();
-                    break;
-                case 3:
-                    Gdx.app.exit();
-                    System.exit(-1);
-                    break;
-                default:
-                    break;
-            }
-        } else if (gameState == State.PAUSED) {
-            switch (menuSelection) {
-                case 0:
-                    unpauseGame();
-                    break;
-                case 1:
-                    destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
-                    restartGame();
-                    break;
-                case 2:
-                    exitToMainMenu();
-                    break;
-                default:
-                    break;
-            }
-        } else if (gameState == State.GAMEOVER) {
-            switch (menuSelection) {
-                case 0:
-                    restartGame();
-                    break;
-                case 1:
-                    exitToMainMenu();
-                    break;
-                default:
-                    break;
-            }
+                        currentlyShowingInstructions = true;
+                        break;
+                    case 2:
+                        toggleFullscreen();
+                        break;
+                    case 3:
+                        Gdx.app.exit();
+                        System.exit(-1);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case PAUSED:
+                switch (menuSelection) {
+                    case 0:
+                        unpauseGame();
+                        break;
+                    case 1:
+                        destroySpritesByIDs(new int[]{20}); // remove pause sprites
+                        restartGame();
+                        break;
+                    case 2:
+                        exitToMainMenu();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case GAMEOVER:
+                switch (menuSelection) {
+                    case 0:
+                        restartGame();
+                        break;
+                    case 1:
+                        exitToMainMenu();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
-    private void startGame() {
-        timeElapsed = 0; // reset on repeat playthroughs
-        gameState = State.GAMEPLAY;
-        destroySpritesByIDs(new int[] { 1 }); // remove title sprites
-    }
 
+    /**
+     * Pauses the game
+     */
     private void pauseGame() {
         optionRects.clear();
         GlyphLayout layout = new GlyphLayout();
         for (int i = 0; i < pauseOptions.length; i++) {
             layout.setText(boldFont, pauseOptions[i]);
-
             optionRects.add(new Rectangle(menuOptionInitx - 15, (menuOptionInity - 32 - i * 40), 300, 32));
         }
 
@@ -478,22 +608,32 @@ public class Main extends Game {
         createPauseAssets();
     }
 
+    /**
+     * Unpauses the game
+     */
     private void unpauseGame() {
         gameState = State.GAMEPLAY;
-        destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
+        destroySpritesByIDs(new int[]{20}); // remove pause sprites
     }
 
+    /**
+     * Restarts the game
+     */
     private void restartGame() {
-        initGame();
+        initialiseGame();
         startGame();
     }
 
+    /**
+     * Exits to main menu
+     */
     private void exitToMainMenu() {
-        // we want to reset all relevant variables to the defaults here
-        destroySpritesByIDs(new int[] { 20 }); // remove pause sprites
-        initGame();
+        destroySpritesByIDs(new int[]{20}); // remove pause sprites
     }
 
+    /**
+     * Sets up game over menu options
+     */
     private void gameOverMenuOptions() {
         optionRects.clear();
         GlyphLayout layout = new GlyphLayout();
@@ -506,42 +646,45 @@ public class Main extends Game {
         maxMenuOptions = 2;
     }
 
+    /**
+     * Handles logic according to the game state
+     */
     private void logic() {
-        framesElapsed++;
-        globalTimeElapsed += Gdx.graphics.getDeltaTime();
         if (gameState == State.GAMEPLAY) {
             timeElapsed += Gdx.graphics.getDeltaTime();
-            timeRemaining = (float) Math.ceil(timeAllowed - timeElapsed);
+            float timeRemaining = (float) Math.ceil(timeAllowed - timeElapsed);
+
             if (timeRemaining < 0) {
                 timeRemainingReadable = "0:00";
                 gameState = State.GAMEOVER;
                 gameOverMenuOptions();
-            } else {
-                timeRemainingReadable = convertTimeToReadable(timeRemaining);
             }
-            buildingMenuOpen = (selectedBuildingIndex == -1); // hide menu to place building
+            timeRemainingReadable = convertTimeToReadable(timeRemaining);
+            buildingMenuOpen = (selectedBuildingIndex == -1);
         }
     }
 
-    private boolean placeBuilding(Building building, int x, int y) {
+    /**
+     * Places a building from a building preset at the
+     * given tile co-ordinates if the placement is valid
+     * @param building The base building
+     * @param x The x co-ordinate of the building in tiles
+     * @param y The y co-ordinate of the building in tiles
+     */
+    private void placeBuilding(Building building, int x, int y) {
         int index = map.getIndexFromTileCoords(x, y);
         if (!map.placeBuilding(index, building.getWidth(), building.getHeight())) {
-            return false;
+            return;
         }
 
-        Building newBuilding = new Building(building, building.getPresetIndex(), index);
+        Building newBuilding = new Building(building, index);
         buildings.add(newBuilding);
-
-        return true;
     }
 
-    private String convertTimeToReadable(float seconds) {
-        int minutes = (int) seconds / 60;
-        int tmpSeconds = (int) seconds % 60;
-
-        return String.format("%d:%02d", minutes, tmpSeconds);
-    }
-
+    /**
+     * Handles drawing according to the game state using
+     * {@code switch} statements
+     */
     private void draw() {
         // BG colour and set background
         Gdx.gl.glClearColor(0f, 0f, 0f, 1.0f);
@@ -550,52 +693,44 @@ public class Main extends Game {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        // DRAWING ORDER -> bottom layer -> top layer ( text is at the end to stay ontop
-        // )
+
         switch (gameState) {
             case TITLE:
                 drawCheckerPattern();
-                drawTransMenuBoxes();
-                break;
-            case GAMEPLAY:
-                // drawMap();
+                drawTransparentMenuBoxes();
                 break;
             case PAUSED:
                 drawMap();
                 drawCheckerPattern();
-                drawTransMenuBoxes();
+                drawTransparentMenuBoxes();
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
-                break;
-            case GAMEOVER:
                 break;
             default:
                 break;
         }
 
         batch.begin();
-
-        // text must be rendered as part of the batch
         switch (gameState) {
             case TITLE:
-                renderTitle();
+                drawTitleScreen();
                 break;
+
             case GAMEPLAY:
                 drawMapTiles();
                 batch.end();
                 if (buildingMenuOpen) {
-                    drawBuildingTransBox();
-                } else {
-                    // draw button to open ?
-                    if (selectedBuildingIndex != -1) {
-                        drawPlacerBox();
-                    }
+                    drawBuildingTransparentBox();
+                } else if (selectedBuildingIndex != -1) {
+                    drawPlacerBox();
                 }
+
                 drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
                 batch.begin();
-                renderGameText();
+                drawGameText();
+
                 if (buildingMenuOpen) {
-                    renderBuildingSelectionText();
-                    hideSpritesByID(new int[] { 101, 102 });
+                    drawBuildingSelectionText();
+                    hideSpritesByID(new int[]{101, 102});
                     // render building icons that go above text
                     for (int i = 0; i < buildingPresetNames.length; i++) {
                         render.getSpriteByID(110 + i).setPos(25 + (i * 150), 45);
@@ -604,38 +739,42 @@ public class Main extends Game {
                     render.getSpriteByID(101).setPos(mouseX - 15, mouseY - 25);
                     render.getSpriteByID(102).setPos(mouseX + 12, mouseY - 25);
 
-                    hideSpritesByID(new int[] { 110, 111, 112, 113 });
+                    hideSpritesByID(new int[]{110, 111, 112, 113});
                 }
+                break;
 
-                break;
-            case PAUSED:
-                // move tick and cross offscreen
-                hideGameSprites();
-                renderPauseScreen();
-                break;
-            case GAMEOVER:
-                hideGameSprites();
-                drawMapTiles();
-                batch.end();
-                drawTransMenuBoxes();
-                drawClockIcon(1255, 688, 12, ((timeElapsed % 1) * 360) + 90);
-                batch.begin();
-                renderGameOverText();
-            default:
-                break;
+                case PAUSED:
+                    hideGameSprites();
+                    drawPauseScreen();
+                    break;
+
+                case GAMEOVER:
+                    hideGameSprites();
+                    drawMapTiles();
+                    batch.end();
+
+                    drawTransparentMenuBoxes();
+                    drawClockIcon(1255, 688, 12, 0);;
+                    drawGameOverText();
+
+                default:
+                    break;
         }
+
         if (showDebugText) {
-            renderDebugText();
+            drawDebugText();
         }
 
-        // draw sprites first
         for (Sprite sprite : new ArrayList<>(render.getEntities())) {
             sprite.draw(batch, Gdx.graphics.getDeltaTime());
         }
-
         batch.end();
     }
 
+    /**
+     * Hides a list of sprites given their id's
+     * @param spriteIDs The ids of the sprites to be hidden
+     */
     public void hideSpritesByID(int[] spriteIDs) {
         for (int id : spriteIDs) {
             if (render.setOfIDs.contains(id)) {
@@ -644,59 +783,65 @@ public class Main extends Game {
         }
     }
 
+    /**
+     * Hides all game sprites
+     */
     private void hideGameSprites() {
-        hideSpritesByID(new int[] { 101, 102, 110, 111, 112, 113 });
+        hideSpritesByID(new int[]{101, 102, 110, 111, 112, 113});
     }
 
+    /**
+     * Draws the building placement box to show where a
+     * building will be placed and show which tiles are
+     * valid and invalid.
+     */
     private void drawPlacerBox() {
         // needed for transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         Building building = buildingPresets.get(selectedBuildingIndex);
+
         int[] mouseTileCoords = convertMouseCoordsToTileCoords(mouseX, mouseY);
-        int mouseTileX = mouseTileCoords[0];
-        int mouseTileY = mouseTileCoords[1];
-        int index = map.getIndexFromTileCoords(mouseTileX, mouseTileY);
+        int index = map.getIndexFromTileCoords(mouseTileCoords[0], mouseTileCoords[1]);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int rowStart = index, row = 0; row < building.getHeight(); row++, rowStart += map.WIDTH) {
             for (int column = 0; column < building.getWidth(); column++) {
-                if (map.isIndexOutOfBounds(rowStart + column)){
+                if (map.isIndexOutOfBounds(rowStart + column)) {
                     continue;
                 }
                 if (map.get(rowStart + column) != 1) {
                     shapeRenderer.setColor(1f, 0, 0, 0.6f); // draw filled
                 }
-                else{
+                else {
                     shapeRenderer.setColor(0, 1f, 0, 0.6f); // draw filled
                 }
+
                 int tileX;
                 int tileY;
-
                 int[] tileCoords = map.getTileCoordsFromIndex(rowStart + column);
                 tileX = tileCoords[0];
                 tileY = tileCoords[1];
+
                 shapeRenderer.rect(tileX * map.TILE_SIZE, tileY * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
             }
         }
         shapeRenderer.end();
 
-
         shapeRenderer.setColor(1, 1, 1, 1); // draw outline
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.rect(
-                (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
-                (int) (mouseY / map.TILE_SIZE) * map.TILE_SIZE,
-                building.getWidth() * map.TILE_SIZE,
-                building.getHeight() * map.TILE_SIZE);
+            (int) (mouseX / map.TILE_SIZE) * map.TILE_SIZE,
+            (int) (mouseY / map.TILE_SIZE) * map.TILE_SIZE,
+            building.getWidth() * map.TILE_SIZE,
+            building.getHeight() * map.TILE_SIZE);
         shapeRenderer.end();
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    private void drawBuildingTransBox() {
-        // needed for transparency
+    private void drawBuildingTransparentBox() {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -707,19 +852,23 @@ public class Main extends Game {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(1, 1, 1, 1);
+
         for (int i = 0; i < buildingPresetNames.length; i++) {
             shapeRenderer.rect((i * 150), 0, 150, 150);
         }
         shapeRenderer.end();
+
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    private void drawTransMenuBoxes() {
-        // needed for transparency
+    /**
+     * Draw transparent menu boxes for the title screen
+     */
+    private void drawTransparentMenuBoxes() {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
         if (gameState == State.PAUSED || gameState == State.GAMEOVER) {
             shapeRenderer.setColor(0, 0, 0, 0.6f);
             shapeRenderer.rect(0, 0, 1280, 720);
@@ -728,33 +877,41 @@ public class Main extends Game {
         for (int i = 0; i < optionRects.size(); i++) {
             if (i == menuSelection) {
                 shapeRenderer.setColor(1f, 1f, 1f, 0.8f);
-            } else {
+            }
+            else {
                 shapeRenderer.setColor(0, 0, 0, 0.8f);
             }
             shapeRenderer.rect(menuOptionInitx - 15, (menuOptionInity - 30 - i * 40), 300, 36);
         }
-
         shapeRenderer.end();
+
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
+    /**
+     * Draws a scrolling checker pattern
+     */
     private void drawCheckerPattern() {
-        // needed for transparency
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
+        // Speed of scrolling in pixels per second
+        float scrollSpeed = 50f;
         offset += scrollSpeed * Gdx.graphics.getDeltaTime(); // Moves right
+        // tile scrolling effect
+        int tileSize = 50;
         offset %= tileSize;
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // adjust x and y based on offset
-        for (int y = -tileSize + (int) offset; y < RESOLUTIONY + tileSize; y += tileSize) {
-            for (int x = -tileSize + (int) offset; x < RESOLUTIONX + tileSize; x += tileSize) {
+        for (int y = -tileSize + (int) offset; y < RESOLUTION_Y + tileSize; y += tileSize) {
+            for (int x = -tileSize + (int) offset; x < RESOLUTION_X + tileSize; x += tileSize) {
                 if (((x + tileSize) / tileSize + (y + tileSize) / tileSize) % 2 == 0) {
                     shapeRenderer.setColor(0f, 0f, 0f, gameState == State.PAUSED ? 0.25f : 1f);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
-                } else {
+                }
+                else {
                     shapeRenderer.setColor(0.8f, 0.2f, 0.2f, gameState == State.PAUSED ? 0.25f : 1f);
                     shapeRenderer.rect(x, y, tileSize, tileSize);
                 }
@@ -765,6 +922,16 @@ public class Main extends Game {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
+    /**
+     * Draws a clock at a given location
+     * @param x The x position of the clock centre in
+     *          pixels
+     * @param y The y position of the clock center in
+     *          pixels
+     * @param radius The radius of the clock in pixels
+     * @param degrees The amount of rotation of the clock
+     *               hand in degrees
+     */
     public void drawClockIcon(float x, float y, float radius, float degrees) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.WHITE);
@@ -780,23 +947,30 @@ public class Main extends Game {
         shapeRenderer.end();
     }
 
+    /**
+     * Draws the map tiles
+     */
     private void drawMapTiles() {
         for (int y = 0; y < map.HEIGHT; y++) {
             for (int x = 0; x < map.WIDTH; x++) {
-                if (map.getFromTileCoords(x, y) != 3){
-                    batch.draw(getTileFromUID(map.getFromTileCoords(x, y)), x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE,
-                        TILE_SIZE);
+                if (map.getFromTileCoords(x, y) != 3) {
+                    batch.draw(getTileFromUID(map.getFromTileCoords(x, y)),
+                        x * map.TILE_SIZE,
+                        y * map.TILE_SIZE,
+                        map.TILE_SIZE,
+                        map.TILE_SIZE);
                     continue;
                 }
 
                 int buildingStartTileX;
                 int buildingStartTileY;
                 int[] buildingStartTileCoords = map.getTileCoordsFromIndex(getBuildingStartIndex(map.getIndexFromTileCoords(x, y)));
+
                 int buildingPresetIndex = getIndexOfBuildingPreset(map.getIndexFromTileCoords(x, y));
                 buildingStartTileX = buildingStartTileCoords[0];
                 buildingStartTileY = buildingStartTileCoords[1];
 
-                switch (buildingPresetIndex){
+                switch (buildingPresetIndex) {
                     case 0:
                         batch.draw(tiles[1][((x * 9301 + 49297 - y) % 233280) % 2], x * map.TILE_SIZE, y * map.TILE_SIZE, map.TILE_SIZE, map.TILE_SIZE);
                         break;
@@ -815,28 +989,23 @@ public class Main extends Game {
                     default:
                         break;
                 }
-
-
-
-
-
-
-
-                // batch.draw(tiles[0][(int) ((Math.sin(globalTimeElapsed * x*x + y*y) + 1) *
-                // 2.5)], x * map.TILE_SIZE, y * map.TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
 
-    private int getIndexOfBuildingPreset(int buildingTileIndex){
-        for (Building building: buildings){
+    /**
+     * Gets building preset index a building was based off
+     * of given a tile index of the building
+     * @param buildingTileIndex The queried building
+     * @return The preset index that belongs to the building
+     */
+    private int getIndexOfBuildingPreset(int buildingTileIndex) {
+        for (Building building : buildings) {
             int buildingStartTileX;
             int buildingStartTileY;
             int[] buildingStartTileCoords = map.getTileCoordsFromIndex(building.getIndex());
             buildingStartTileX = buildingStartTileCoords[0];
             buildingStartTileY = buildingStartTileCoords[1];
-
-            System.out.println(Arrays.toString(buildingStartTileCoords));
 
             int buildingTileX;
             int buildingTileY;
@@ -848,15 +1017,21 @@ public class Main extends Game {
             int xMax = buildingStartTileX + building.getWidth() - 1;
             int yMax = buildingStartTileY + building.getHeight() - 1;
 
-            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY && buildingTileY <= yMax){
+            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY && buildingTileY <= yMax) {
                 return building.getPresetIndex();
             }
         }
         throw new RuntimeException("No Building Found");
     }
 
-    private int getBuildingStartIndex(int buildingTileIndex){
-        for (Building building: buildings){
+    /**
+     * Gets start index of  a building was based off
+     * of given a tile index of the building
+     * @param buildingTileIndex The queried building
+     * @return The index of the building in the map
+     */
+    private int getBuildingStartIndex(int buildingTileIndex) {
+        for (Building building : buildings) {
             int buildingStartTileX;
             int buildingStartTileY;
             int[] buildingStartTileCoords = map.getTileCoordsFromIndex(building.getIndex());
@@ -872,12 +1047,30 @@ public class Main extends Game {
             int xMax = buildingStartTileX + building.getWidth() - 1;
             int yMax = buildingStartTileY + building.getHeight() - 1;
 
-            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY && buildingTileY <= yMax){
+            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY && buildingTileY <= yMax) {
                 return building.getIndex();
             }
         }
         throw new RuntimeException("No Building Found");
     }
+
+    /**
+     * Formats a time
+     * @param seconds The unformatted time in seconds
+     * @return A formatted time
+     */
+    private String convertTimeToReadable(float seconds) {
+        int minutes = (int) seconds / 60;
+        int tmpSeconds = (int) seconds % 60;
+
+        return String.format("%d:%02d", minutes, tmpSeconds);
+    }
+
+    /**
+     * Returns the texture region of tile given a uid
+     * @param UID The uid of the tile
+     * @return The corresponding texture region of the uid
+     */
     private TextureRegion getTileFromUID(int UID) {
         return switch (UID) {
             case 0 -> tiles[0][4]; // unknown texture
@@ -888,6 +1081,9 @@ public class Main extends Game {
         };
     }
 
+    /**
+     * Draw the map
+     */
     private void drawMap() {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int y = 0; y < map.HEIGHT; y = y + 1) {
@@ -899,6 +1095,11 @@ public class Main extends Game {
         shapeRenderer.end();
     }
 
+    /**
+     * Gets the colour of a tile based off of a uid
+     * @param UID The uid of the tile
+     * @return The color of the corresponding tile
+     */
     private Color getColourFromUID(int UID) {
         return switch (UID) {
             case 0 -> Color.PURPLE;
@@ -909,31 +1110,37 @@ public class Main extends Game {
         };
     }
 
-    // Centers a sprite based on the screen dimensions
-    private void centerSprite(Sprite sprite) {
-        float centerX = (RESOLUTIONX - sprite.getWidth()) / 2.0f;
-        float centerY = (RESOLUTIONY - sprite.getHeight()) / 2.0f;
-        sprite.setPos(centerX, centerY);
+    /**
+     * Converts mouse co-ordinates to tile co-ordinates
+     * @param mouseX The x position of the mouse in pixels
+     * @param mouseY The y position of the mouse in pixels
+     * @return [mouseTileX, mouseTileY]
+     */
+    private int[] convertMouseCoordsToTileCoords(float mouseX, float mouseY) {
+        return new int[]{(int) mouseX / map.TILE_SIZE, (int) mouseY / map.TILE_SIZE};
     }
 
     // Overload for setting either X or Y if necessary
     private void centerSpriteX(Sprite sprite) {
-        float centerX = (RESOLUTIONX - sprite.getWidth()) / 2.0f;
+        float centerX = (RESOLUTION_X - sprite.getWidth()) / 2.0f;
         sprite.setPos(centerX, sprite.rectangle.y); // keep current Y
     }
 
-    private void centerSpriteY(Sprite sprite) {
-        float centerY = (RESOLUTIONY - sprite.getHeight()) / 2.0f;
-        sprite.setPos(sprite.rectangle.x, centerY); // keep current X
-    }
-
+    /**
+     * Destroys an array of sprites by ids
+     * @param spriteIDs The array of sprite ids to be
+     *                  destroyed
+     */
     public void destroySpritesByIDs(int[] spriteIDs) {
         for (int id : spriteIDs) {
             render.removeSpriteByID(id);
         }
     }
 
-    private void renderTitle() {
+    /**
+     * Draws the title screen
+     */
+    private void drawTitleScreen() {
         String menuText = "";
         for (int i = 0; i < menuOptions.length; i++) {
             menuText = menuOptions[i];
@@ -951,8 +1158,11 @@ public class Main extends Game {
         drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
 
-    private void renderPauseScreen() {
-        renderTime();
+    /**
+     * Draws the pause screen
+     */
+    private void drawPauseScreen() {
+        drawTime();
 
         drawCenteredText(extraBoldFont, batch, "Paused", 640, 475);
 
@@ -965,34 +1175,37 @@ public class Main extends Game {
         drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
 
-    private void renderGameText() {
-        renderTime();
+    /**
+     * Draws the text for the game
+     */
+    private void drawGameText() {
+        drawTime();
 
-        accomodationcount = 0;
-        cafeteriacount = 0;
-        coursecount = 0;
-        recreationalcount = 0;
+        accommodationBuildingCount = 0;
+        cafeteriaBuildingCount = 0;
+        courseBuildingCount = 0;
+        recreationalBuildingCount = 0;
 
         for (Building building : buildings) {
             if (building.isAccomodationBuilding())
-                accomodationcount++;
+                accommodationBuildingCount++;
             if (building.isCafeteriaBuilding())
-                cafeteriacount++;
+                cafeteriaBuildingCount++;
             if (building.isCourseBuilding())
-                coursecount++;
+                courseBuildingCount++;
             if (building.isRecreationalBuilding())
-                recreationalcount++;
+                recreationalBuildingCount++;
         }
 
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
         drawRightAlignedText(smallFont, batch, "Buildings placed", 1270, 600);
-        drawRightAlignedText(smallerFont, batch, accomodationcount + " accommodation", 1270, 580);
-        drawRightAlignedText(smallerFont, batch, cafeteriacount + " cafeteria", 1270, 560);
-        drawRightAlignedText(smallerFont, batch, coursecount + " course", 1270, 540);
-        drawRightAlignedText(smallerFont, batch, recreationalcount + " recreational", 1270, 520);
+        drawRightAlignedText(smallerFont, batch, accommodationBuildingCount + " No. Accomodation Buildings", 1270, 580);
+        drawRightAlignedText(smallerFont, batch, cafeteriaBuildingCount + " No. Cafeteria Buildings", 1270, 560);
+        drawRightAlignedText(smallerFont, batch, courseBuildingCount + " No. Course Buildings", 1270, 540);
+        drawRightAlignedText(smallerFont, batch, recreationalBuildingCount + " No. Recreational Buildings", 1270, 520);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
-        drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
+        drawRightAlignedText(smallFont, batch, "Satisfaction Score: ", 1270, 450);
 
         if (selectedBuildingIndex != -1) {
             drawCenteredText(smallerFont, batch, buildingPresetNames[selectedBuildingIndex], mouseX, mouseY - 30);
@@ -1003,7 +1216,10 @@ public class Main extends Game {
 
     }
 
-    private void renderBuildingSelectionText() {
+    /**
+     * Draws the building selection text
+     */
+    private void drawBuildingSelectionText() {
         String menuText = "";
         for (int i = 0; i < buildingPresetNames.length; i++) {
             menuText = buildingPresetNames[i];
@@ -1011,25 +1227,31 @@ public class Main extends Game {
         }
     }
 
-    private void renderTime() {
+    /**
+     * Draws the remaining time
+     */
+    private void drawTime() {
         drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
         drawRightAlignedText(smallFont, batch, "Time remaining", 1270, 670);
     }
 
-    private void renderGameOverText() {
+    /**
+     * Draws the game over text
+     */
+    private void drawGameOverText() {
         drawRightAlignedText(boldFont, batch, timeRemainingReadable, 1240, 700);
         drawRightAlignedText(smallFont, batch, "Time's up!", 1270, 670);
 
         drawCenteredText(extraBoldFont, batch, "Game over!", 640, 600);
 
         drawCenteredText(boldFont, batch, "Stats", 640, 460);
-        drawCenteredText(smallFont, batch, "Buildings placed: " + String.valueOf(buildings.size()), 640, 420);
-        drawCenteredText(smallFont, batch, accomodationcount + " accommodation", 640, 400);
-        drawCenteredText(smallFont, batch, cafeteriacount + " cafeteria", 640, 380);
-        drawCenteredText(smallFont, batch, coursecount + " course", 640, 360);
-        drawCenteredText(smallFont, batch, recreationalcount + " recreational", 640, 340);
+        drawCenteredText(smallFont, batch, "Buildings placed: " + buildings.size(), 640, 420);
+        drawCenteredText(smallFont, batch, accommodationBuildingCount + " Accomodation Buildings Placed", 640, 400);
+        drawCenteredText(smallFont, batch, cafeteriaBuildingCount + " Cafeteria Buildings Placed", 640, 380);
+        drawCenteredText(smallFont, batch, courseBuildingCount + " Course Buildings Placed", 640, 360);
+        drawCenteredText(smallFont, batch, recreationalBuildingCount + " Recreational Buildings Placed", 640, 340);
 
-        drawCenteredText(smallFont, batch, "50% satisfaction", 640, 290);
+        drawCenteredText(smallFont, batch, "50% Satisfaction Score", 640, 290);
 
         String menuText = "";
         for (int i = 0; i < gameOverOptions.length; i++) {
@@ -1040,11 +1262,12 @@ public class Main extends Game {
         drawCenteredText(normalFont, batch, "Press ENTER to select", 640, 30);
     }
 
-    private void renderDebugText() {
+    /**
+     * Draw the debug text
+     */
+    private void drawDebugText() {
         smallFont.draw(batch, "GAME STATE: " + gameState, 0, 700);
-        smallFont.draw(batch, "FRAMES ELAPSED: " + framesElapsed, 0, 670);
         smallFont.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 0, 640);
-        // font.draw(batch, "TIME ELAPSED: " + timeElapsed, 0, 180);
 
         smallFont.draw(batch, "Mouse pos: " + mouseX + ", " + mouseY, 0, 600);
         smallFont.draw(batch, "menuSelection: " + menuSelection, 0, 580);
@@ -1056,7 +1279,6 @@ public class Main extends Game {
     public void drawCenteredText(BitmapFont font, SpriteBatch batch, String text, float x, float y) {
         GlyphLayout layout = new GlyphLayout(font, text);
         float adjustedX = x - layout.width / 2;
-        // float adjustedY = y + layout.height / 2;
         font.draw(batch, layout, adjustedX, y);
     }
 
@@ -1084,6 +1306,9 @@ public class Main extends Game {
         batch.begin();
     }
 
+    /**
+     * Main update loop to handle input, logic and drawing
+     */
     @Override
     public void render() {
         inputs();
@@ -1102,5 +1327,33 @@ public class Main extends Game {
         batch.dispose();
         normalFont.dispose();
         boldFont.dispose();
+    }
+
+    /**
+     * Represents the different states the game can be in
+     * and helps control game follow and handle events based
+     * on the current game state
+     */
+    enum State {
+        /**
+         * The initial state before the game starts showing
+         * the title screen
+         */
+        TITLE,
+
+        /**
+         * The state for active game play
+         */
+        GAMEPLAY,
+
+        /**
+         * The state for if the game is paused
+         */
+        PAUSED,
+
+        /**
+         * The state for if the game is over
+         */
+        GAMEOVER
     }
 }
