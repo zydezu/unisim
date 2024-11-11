@@ -1,7 +1,6 @@
 package io.github.c3team7.unisim;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.github.c3team7.unisim.Map.Map;
@@ -282,7 +281,7 @@ public class Main extends Game {
             toggleFullscreen();
         }
 
-        // TODO: remove debug toggle
+        // Debug toggle
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
             showDebugText = !showDebugText;
         // Manage player inputs here
