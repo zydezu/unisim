@@ -34,7 +34,7 @@ public class Building {
         this.width = building.getWidth();
         this.height = building.getHeight();
 
-        if (building.isAccomodationBuilding()){
+        if (building.isAccommodationBuilding()){
             setAccommodationBuilding();
         }
 
@@ -55,7 +55,7 @@ public class Building {
         return index != -1;
     }
 
-    public boolean isAccomodationBuilding() {
+    public boolean isAccommodationBuilding() {
         return accommodationBuilding != null;
     }
 

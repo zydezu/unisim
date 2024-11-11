@@ -84,7 +84,7 @@ public class Main extends Game {
     private List<Building> buildings;
     private List<Building> buildingPresets;
     private String[] buildingPresetNames = { // should probably be moved to a .txt file
-            "Accomodation",
+            "Accommodation",
             "Cafeteria",
             "Course",
             "Recreational",
@@ -95,10 +95,10 @@ public class Main extends Game {
     // building menu
     private Boolean buildingMenuOpen = true;
     private boolean showCantPlaceBuilding = false;
-    int accomodationcount = 0;
-    int cafeteriacount = 0;
-    int coursecount = 0;
-    int recreationalcount = 0;
+    int accommodationCount = 0;
+    int cafeteriaCount = 0;
+    int courseCount = 0;
+    int recreationalCount = 0;
 
     // menu options
     private Boolean currentlyShowingInstructions = false;
@@ -947,28 +947,29 @@ public class Main extends Game {
     private void renderGameText() {
         renderTime();
 
-        accomodationcount = 0;
-        cafeteriacount = 0;
-        coursecount = 0;
-        recreationalcount = 0;
+        accommodationCount = 0;
+        cafeteriaCount = 0;
+        courseCount = 0;
+        recreationalCount = 0;
 
         for (Building building : buildings) {
-            if (building.isAccomodationBuilding())
-                accomodationcount++;
-            if (building.isCafeteriaBuilding())
-                cafeteriacount++;
-            if (building.isCourseBuilding())
-                coursecount++;
-            if (building.isRecreationalBuilding())
-                recreationalcount++;
+            if (building.isAccommodationBuilding()) {
+                accommodationCount++;
+            } else if (building.isCafeteriaBuilding()) {
+                cafeteriaCount++;
+            } else if (building.isCourseBuilding()) {
+                courseCount++;
+            } else if (building.isRecreationalBuilding()) {
+                recreationalCount++;
+            }
         }
 
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
         drawRightAlignedText(smallFont, batch, "Buildings placed", 1270, 600);
-        drawRightAlignedText(smallerFont, batch, accomodationcount + " accommodation", 1270, 580);
-        drawRightAlignedText(smallerFont, batch, cafeteriacount + " cafeteria", 1270, 560);
-        drawRightAlignedText(smallerFont, batch, coursecount + " course", 1270, 540);
-        drawRightAlignedText(smallerFont, batch, recreationalcount + " recreational", 1270, 520);
+        drawRightAlignedText(smallerFont, batch, accommodationCount + " accommodation", 1270, 580);
+        drawRightAlignedText(smallerFont, batch, cafeteriaCount + " cafeteria", 1270, 560);
+        drawRightAlignedText(smallerFont, batch, courseCount + " course", 1270, 540);
+        drawRightAlignedText(smallerFont, batch, recreationalCount + " recreational", 1270, 520);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
         drawRightAlignedText(smallFont, batch, "Satisfaction rating", 1270, 450);
@@ -979,7 +980,6 @@ public class Main extends Game {
         if (showCantPlaceBuilding) {
             smallFont.draw(batch, "Can't place here!", mouseX + 15, mouseY + 15);
         }
-
     }
 
     private void renderBuildingSelectionText() {
@@ -1004,10 +1004,10 @@ public class Main extends Game {
 
         drawCenteredText(boldFont, batch, "Stats", 640, 460);
         drawCenteredText(smallFont, batch, "Buildings placed: " + String.valueOf(buildings.size()), 640, 420);
-        drawCenteredText(smallFont, batch, accomodationcount + " accommodation", 640, 400);
-        drawCenteredText(smallFont, batch, cafeteriacount + " cafeteria", 640, 380);
-        drawCenteredText(smallFont, batch, coursecount + " course", 640, 360);
-        drawCenteredText(smallFont, batch, recreationalcount + " recreational", 640, 340);
+        drawCenteredText(smallFont, batch, accommodationCount + " accommodation", 640, 400);
+        drawCenteredText(smallFont, batch, cafeteriaCount + " cafeteria", 640, 380);
+        drawCenteredText(smallFont, batch, courseCount + " course", 640, 360);
+        drawCenteredText(smallFont, batch, recreationalCount + " recreational", 640, 340);
 
         drawCenteredText(smallFont, batch, "50% satisfaction", 640, 290);
 
