@@ -834,7 +834,7 @@ public class Main extends Game {
                 return building.getPresetIndex();
             }
         }
-        throw new RuntimeException("No Building Found");
+        throw new RuntimeException("No building found!");
     }
 
     private int getBuildingStartIndex(int buildingTileIndex) {
@@ -854,7 +854,7 @@ public class Main extends Game {
                 return building.getIndex();
             }
         }
-        throw new RuntimeException("No Building Found");
+        throw new RuntimeException("No building found!");
     }
 
     private TextureRegion getTileFromUID(int UID) {
