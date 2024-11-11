@@ -818,26 +818,19 @@ public class Main extends Game {
     }
 
     private int getIndexOfBuildingPreset(int buildingTileIndex) {
+        int[] buildingTileCoords = map.getTileCoordsFromIndex(buildingTileIndex);
+        int buildingTileX = buildingTileCoords[0];
+        int buildingTileY = buildingTileCoords[1];
         for (Building building : buildings) {
-            int buildingStartTileX;
-            int buildingStartTileY;
             int[] buildingStartTileCoords = map.getTileCoordsFromIndex(building.getIndex());
-            buildingStartTileX = buildingStartTileCoords[0];
-            buildingStartTileY = buildingStartTileCoords[1];
-
-            // System.out.println(Arrays.toString(buildingStartTileCoords));
-
-            int buildingTileX;
-            int buildingTileY;
-            int[] buildingTileCoords = map.getTileCoordsFromIndex(buildingTileIndex);
-            buildingTileX = buildingTileCoords[0];
-            buildingTileY = buildingTileCoords[1];
+            int buildingStartTileX = buildingStartTileCoords[0];
+            int buildingStartTileY = buildingStartTileCoords[1];
 
             int xMax = buildingStartTileX + building.getWidth() - 1;
             int yMax = buildingStartTileY + building.getHeight() - 1;
 
-            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY
-                    && buildingTileY <= yMax) {
+            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax
+                    && buildingTileY >= buildingStartTileY && buildingTileY <= yMax) {
                 return building.getPresetIndex();
             }
         }
@@ -845,24 +838,19 @@ public class Main extends Game {
     }
 
     private int getBuildingStartIndex(int buildingTileIndex) {
+        int[] buildingTileCoords = map.getTileCoordsFromIndex(buildingTileIndex); // Calculate once
+        int buildingTileX = buildingTileCoords[0];
+        int buildingTileY = buildingTileCoords[1];
         for (Building building : buildings) {
-            int buildingStartTileX;
-            int buildingStartTileY;
             int[] buildingStartTileCoords = map.getTileCoordsFromIndex(building.getIndex());
-            buildingStartTileX = buildingStartTileCoords[0];
-            buildingStartTileY = buildingStartTileCoords[1];
-
-            int buildingTileX;
-            int buildingTileY;
-            int[] buildingTileCoords = map.getTileCoordsFromIndex(buildingTileIndex);
-            buildingTileX = buildingTileCoords[0];
-            buildingTileY = buildingTileCoords[1];
+            int buildingStartTileX = buildingStartTileCoords[0];
+            int buildingStartTileY = buildingStartTileCoords[1];
 
             int xMax = buildingStartTileX + building.getWidth() - 1;
             int yMax = buildingStartTileY + building.getHeight() - 1;
 
-            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax && buildingTileY >= buildingStartTileY
-                    && buildingTileY <= yMax) {
+            if (buildingTileX >= buildingStartTileX && buildingTileX <= xMax
+                    && buildingTileY >= buildingStartTileY && buildingTileY <= yMax) {
                 return building.getIndex();
             }
         }
