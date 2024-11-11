@@ -1,12 +1,5 @@
 package io.github.c3team7.unisim.Building;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
-
-import io.github.c3team7.unisim.Render;
-import io.github.c3team7.unisim.Sprite;
-
 public class Building {
     private int presetIndex;
     private int index;
