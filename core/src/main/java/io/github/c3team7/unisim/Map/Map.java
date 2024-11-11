@@ -1,31 +1,43 @@
 package io.github.c3team7.unisim.Map;
 
-import java.util.Arrays;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+/**
+ * This class represents a tiled map and can export and
+ * import from a .txt file and allows rectangular buildings
+ * to be validated and placed along with various helper
+ * methods to convert co-ordinates to an index and
+ * vice-versa.
+ */
 public class Map {
+    /**
+     * The tile size of the map in pixels
+     */
     public final int TILE_SIZE = 20;
+
+    /**
+     * The width of the map in tiles
+     */
     public final int WIDTH = 1280 / TILE_SIZE;
+
+    /**
+     * The height of the map in tiles
+     */
     public final int HEIGHT = 720 / TILE_SIZE;
-    private int[] map; // Each integer is a uid for a tile (e.g. 1=grass, 2=water, etc)
 
-    // public int getIndex(int x, int y) {
-    // // do ur array stuff here
-    // return 0;
-    // }
+    /**
+     * An array of uid's (unique identifiers) for tiles
+     * (e.g. 1=grass, 2=water, 3=building)
+     */
+    private int[] map;
 
-    public Map() {
-        map = new int[WIDTH * HEIGHT];
-
-        Arrays.fill(map, 1);
-        exportMap();
-    }
-
+    /**
+     * Constructs a Map from a .txt file.
+     * @param path The path to the .txt file
+     */
     public Map(String path) {
         try {
-            // Use Gdx.files.internal() for loading from the assets directory
             String fileContent = Gdx.files.internal(path).readString();
 
             map = new int[WIDTH * HEIGHT];
@@ -46,18 +58,31 @@ public class Map {
         }
     }
 
+    /**
+     * Gets the uid at a given index
+     * @param index The queried index
+     * @return The uid at the given index
+     */
     public int get(int index) {
-        if (index < 0 || index >= map.length) {
-            throw new IndexOutOfBoundsException();
-        }
-
         return map[index];
     }
 
+    /**
+     * Gets the uid at the given tile co-ordinates
+     * @param x The x tile co-ordinate of the uid
+     * @param y The y tile co-ordinate of the uid
+     * @return The uid at the given tile co-ordinates
+     */
     public int getFromTileCoords(int x, int y) {
         return map[getIndexFromTileCoords(x, y)];
     }
 
+    /**
+     * Converts tile co-ordinates to an index
+     * @param x The x co-ordinate
+     * @param y The y co-ordinate
+     * @return The equivalent index to tile co-ordinates
+     */
     public int getIndexFromTileCoords(int x, int y) {
         if (y < 0 || y > HEIGHT) {
             throw new IllegalArgumentException(String.format("Invalid Y-coordinate (%1$s)", y));
@@ -69,20 +94,25 @@ public class Map {
         return y * WIDTH + x;
     }
 
+    /**
+     *  Converts an index into tile co-ordinates
+     * @param index The index
+     * @return The equivalent tile co-ordinates to the index
+     */
     public int[] getTileCoordsFromIndex(int index) {
         return new int[] { index % WIDTH, index / WIDTH };
     }
 
+
     /**
-     *
-     * @param index  The index of the building's bottom left corner in the
-     *               {@link #map}
+     * Checks if the building can be placed at the given location
+     * @param index  The index of the building's bottom
+     *               left corner in the {@link #map}
      * @param width  The width of the building in tiles
      * @param height The height of the building in tiles
-     * @return true if the building was successfully placed
-     * @return false if the building cannot be placed
+     * @return {@code true} if the building was successfully placed and
+     *         {@code false} if the building cannot be placed.
      */
-
     public boolean canPlaceBuilding(int index, int width, int height){
         int startRow = index / WIDTH;
         int startCol = index % WIDTH;
@@ -101,6 +131,16 @@ public class Map {
         return true;
 
     }
+
+    /**
+     *
+     * @param index  The index of the building's bottom
+     *              left corner in the {@link #map}
+     * @param width  The width of the building in tiles
+     * @param height The height of the building in tiles
+     * @return {@code true} if the building was successfully placed and
+     *         {@code false} if the building cannot be placed
+     */
     public boolean placeBuilding(int index, int width, int height) {
         if (!canPlaceBuilding(index, width, height)){
             return false;
@@ -114,10 +154,19 @@ public class Map {
         return true;
     }
 
+    /**
+     * Checks if a given index is out of bounds
+     * @param index The index
+     * @return {@code true} if the index is out of bounds,
+     * {@code false} otherwise
+     */
     public boolean isIndexOutOfBounds(int index){
         return (index < 0 || index >= map.length);
     }
 
+    /**
+     * Exports the current map to {@code save/export.txt}
+     */
     private void exportMap() {
         try {
             FileHandle file = Gdx.files.local("save/export.txt"); // libgdx way to write to a file
