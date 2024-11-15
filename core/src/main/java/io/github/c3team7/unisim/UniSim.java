@@ -628,6 +628,7 @@ public class UniSim extends Game {
      */
     private void exitToMainMenu() {
         destroySpritesByIDs(new int[]{20}); // remove pause sprites
+        initialiseGame();
     }
 
     /**
@@ -1198,13 +1199,13 @@ public class UniSim extends Game {
 
         drawRightAlignedText(boldFont, batch, String.valueOf(buildings.size()), 1270, 630);
         drawRightAlignedText(smallFont, batch, "Buildings placed", 1270, 600);
-        drawRightAlignedText(smallerFont, batch, accommodationBuildingCount + " No. Accomodation Buildings", 1270, 580);
-        drawRightAlignedText(smallerFont, batch, cafeteriaBuildingCount + " No. Cafeteria Buildings", 1270, 560);
-        drawRightAlignedText(smallerFont, batch, courseBuildingCount + " No. Course Buildings", 1270, 540);
-        drawRightAlignedText(smallerFont, batch, recreationalBuildingCount + " No. Recreational Buildings", 1270, 520);
+        drawRightAlignedText(smallerFont, batch, recreationalBuildingCount + " accommodation", 1270, 580);
+        drawRightAlignedText(smallerFont, batch, cafeteriaBuildingCount + " cafeteria", 1270, 560);
+        drawRightAlignedText(smallerFont, batch, courseBuildingCount + " course", 1270, 540);
+        drawRightAlignedText(smallerFont, batch, recreationalBuildingCount + " recreational", 1270, 520);
 
         drawRightAlignedText(boldFont, batch, "50%", 1270, 480);
-        drawRightAlignedText(smallFont, batch, "Satisfaction Score: ", 1270, 450);
+        drawRightAlignedText(smallFont, batch, "Satisfaction", 1270, 450);
 
         if (selectedBuildingIndex != -1) {
             drawCenteredText(smallerFont, batch, buildingPresetNames[selectedBuildingIndex], mouseX, mouseY - 30);
